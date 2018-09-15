@@ -1,5 +1,6 @@
 import React, { Component } from 'react'
 import { StyleSheet, View,ActivityIndicator,AsyncStorage } from 'react-native'
+import {connect} from 'react-redux'
 
 export class AuthLoadingScreen extends Component {
 
@@ -15,9 +16,8 @@ export class AuthLoadingScreen extends Component {
     await Expo.ScreenOrientation.allow(Expo.ScreenOrientation.Orientation.PORTRAIT);
   }
   loadApp = async () =>{
-    const accessToken = await AsyncStorage.getItem('accessToken');
-    // this.props.navigation.navigate(accessToken?'App':'Auth')
-    this.props.navigation.navigate(accessToken?'Auth':'App')
+    const {accessToken} = this.props;
+    this.props.navigation.navigate(accessToken?'App':'Auth')
   }
   render() {
     return (
@@ -36,4 +36,8 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
 });
-export default AuthLoadingScreen
+
+const mapStateToProps = state => ({
+  accessToken : state.auth.accessToken
+})
+export default connect(mapStateToProps)(AuthLoadingScreen)

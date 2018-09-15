@@ -1,6 +1,6 @@
 import {httpPost} from '../../services/servicesHttp'
 import {ENDPOINTS} from '../../constants'
-export const setUserSession = (email,password)=>{
+export const setUserSession = (email,password,nav)=>{
     const payload = { email , password }; 
     return (dispatch) => {
         httpPost(ENDPOINTS.authenticate,payload).then(({data,status})=>{
@@ -8,10 +8,11 @@ export const setUserSession = (email,password)=>{
                 dispatch({
                     type : "SET_USER_SESSION",
                     payload : {
-                        token : data.token,
+                        accessToken : data.token,
                         user : data.user
                     }
                 })
+                nav.navigate("App")
             }
         })
     }

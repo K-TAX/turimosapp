@@ -1,7 +1,7 @@
 import _ from 'lodash'
 
 const initialState= {
-    token : null,
+    accessToken : null,
     user : null
 }
 

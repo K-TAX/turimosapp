@@ -1,5 +1,5 @@
 import React from 'react';
-import { StyleSheet, View,StatusBar,TouchableOpacity } from 'react-native';
+import { StyleSheet, View,StatusBar,TouchableOpacity,Platform } from 'react-native';
 import { Root,StyleProvider,Icon } from 'native-base';
 import storeConfig from './src/redux/storeConfig'
 import {Provider} from 'react-redux'
@@ -10,11 +10,14 @@ import {
   createSwitchNavigator,
   createDrawerNavigator,
   createStackNavigator,
-  SafeAreaView } from 'react-navigation/'
+  SafeAreaView } from 'react-navigation';
+import Expo from 'expo'
 import {createMaterialBottomTabNavigator} from 'react-navigation-material-bottom-tabs'
 import AuthLoadingScreen from './src/screens/AuthLoadingScreen';
 import SignInScreen from './src/screens/SignInScreen';
 import CabanasScreen from './src/screens/CabanasScreen';
+import CabanaDetailScreen from './src/screens/CabanaDetailScreen';
+import CabanaReservasScreen from './src/screens/CabanaReservasScreen';
 import CampingScreen from './src/screens/CampingScreen';
 
 const AppTabNavigator = createMaterialBottomTabNavigator({
@@ -43,18 +46,38 @@ const AppStackNavigator = createStackNavigator({
       title : "Turismo El Encuentro",
       headerLeft : (
         <TouchableOpacity onPress={()=>navigation.toggleDrawer()}>
-          <View style={{paddingHorizontal : 10}}>
+          <View style={{paddingHorizontal : 15}}>
             <Icon name="menu" fontSize={24} style={{color : 'white'}} />
           </View>
         </TouchableOpacity>
       ),
       headerStyle : {
-        backgroundColor : 'rgb(139, 14, 19)'
-      },
-      headerTitleStyle : {
-        color : 'white'
+        marginTop : Platform.OS === "android" ?  -Expo.Constants.statusBarHeight : 0,
+        backgroundColor : '#282828'
       }
     })
+  },
+  CabanaDetailScreen : {
+    screen : CabanaDetailScreen,
+    navigationOptions : {
+      
+    }
+  },
+  CabanaReservasScreen : {
+    screen : CabanaReservasScreen
+  }
+},{
+  navigationOptions : {
+    headerStyle: { 
+      position: 'absolute',
+      marginTop : Platform.OS === "android" ?  -Expo.Constants.statusBarHeight : 0,
+      backgroundColor: 'transparent',
+      zIndex: 100,
+      top: 0,
+      left: 0,
+      right: 0 
+    },
+    headerTintColor: 'white'
   }
 })
 
@@ -71,21 +94,18 @@ const AppNavigator = createSwitchNavigator({
 export default ()=> (
       <Provider store={storeConfig.store}>
         <PersistGate persistor={storeConfig.persistor}>
-          <Root>
-            <StyleProvider  style={getTheme(commonColor)}> 
+            <StyleProvider style={getTheme(commonColor)}> 
               <View style={styles.container}>
-                <AppNavigator />
+                <Root>
+                  <AppNavigator />
+                </Root>
               </View>
             </StyleProvider>
-          </Root>
         </PersistGate>
       </Provider>
 )
  
 const styles = StyleSheet.create({
-  root : {
-    flex : 1
-  },
   container: {
     flex: 1
   },

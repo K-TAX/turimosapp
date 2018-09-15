@@ -12,10 +12,10 @@ const myApiConfig = (authorizarion = null)=> ({
       'Content-Type': 'application/json',
       "Authorization" : authorizarion ? TOKEN_TYPE+authorizarion : ''
     },
-    onUploadProgress: progressEvent => {
-        let percentCompleted = Math.floor((progressEvent.loaded * 100) / progressEvent.total);
-        console.log(percentCompleted)
-      }
+    // onUploadProgress: progressEvent => {
+    //     let percentCompleted = Math.floor((progressEvent.loaded * 100) / progressEvent.total);
+    //     console.log(percentCompleted)
+    //   }
 })
 
 export function httpGet(endpoint,parameter = null,authorizarion = null){
@@ -52,6 +52,7 @@ export function httpPost(endpoint,payload,authorizarion = null){
          return response
      }).catch(error=>{
         catchMiddlewareHttp(error.response)
+        return error.response;
      })
 }
 export function httpUpdateFile(endpoint,payload,authorizarion = null){

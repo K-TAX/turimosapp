@@ -5,7 +5,8 @@ import curved_mask from '../images/curved_mask.png'
 import curved_mask_inverted from '../images/curved_mask_inverted.png'
 import { Container, View, Icon, Button, Text,Footer,Form, Item, Input } from 'native-base';
 import * as Animatable from 'react-native-animatable';
-
+import {connect} from 'react-redux'
+import {setUserSession} from '../redux/actions/auth'
 const {height: screenHeight} = Dimensions.get('screen');
 const {width: screenWidth} = Dimensions.get('screen');
 const logoSize = {
@@ -13,7 +14,7 @@ const logoSize = {
     height : screenWidth * 0.5
 }
 
-export default class SignInScreen extends Component { 
+class SignInScreen extends Component { 
 state = {
     keyboardOpen : false,
     email : 'arivera@groupbi.cl',
@@ -36,8 +37,7 @@ _keyboardDidHide = ()=> {
 }
 onSignIn = async ()=> {
     const {email,password} = this.state;
-    const payload = {email,password};
-  
+    this.props.setUserSession(email,password,this.props.navigation);
 }
 render() {
     const {keyboardOpen,email,password} = this.state;
@@ -76,7 +76,7 @@ render() {
                                 placeholder='Password' />
                             </Item>
                         </Animatable.View>
-                        <Button onPress={this.onSignIn} iconLeft block rounded info>
+                        <Button onPress={this.onSignIn} iconLeft block rounded primary>
                             <Icon name='login' type="Entypo" />
                             <Text>INICIAR SESIÓN</Text>
                         </Button>
@@ -150,3 +150,8 @@ const styles = StyleSheet.create({
         right : 0
     }
 })
+
+const mapDispatchToProps = dispatch => ({
+    setUserSession : (email,password,nav)=>dispatch(setUserSession(email,password,nav))
+})
+export default connect(null,mapDispatchToProps)(SignInScreen)

@@ -30,7 +30,8 @@ export default (errorResponse)=>{
         case "invalid.credentials" :
             Toast.show({
                 text : "Credenciales Incorrectas.",
-                type : "warning"
+                type : "warning",
+                position : 'top'
             })
             break;
         case "file_exist" :
