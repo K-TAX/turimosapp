@@ -7,6 +7,19 @@ import { Table, Rows } from 'react-native-table-component';
 import {SERVER} from '../constants'
 import _ from 'lodash'
 
+// CabanaDetailScreen : {
+//   screen : CabanaDetailScreen,
+//   navigationOptions : {
+//     headerStyle: { 
+//       position: 'absolute',
+//       marginTop : Platform.OS === "android" ?  -Expo.Constants.statusBarHeight : 0,
+//       backgroundColor: 'transparent',
+//       zIndex: 100,
+//       top: 0,
+//       left: 0,
+//       right: 0 
+//     }
+//   }
 
 class CabanaDetailScreen extends Component {
   state = {
@@ -37,11 +50,6 @@ class CabanaDetailScreen extends Component {
 }
 
 const styles = StyleSheet.create({
-  loading : {
-    flex : 1,
-    justifyContent : 'center',
-    alignItems : 'center'
-  },
   tableText: { 
     margin: 6,
     fontSize : 20,

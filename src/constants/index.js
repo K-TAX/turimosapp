@@ -25,6 +25,7 @@ export const ENDPOINTS = {
     clean_all_anuladas : "clean_all_anuladas",  
     //get
     reservas_admin : "reservas_admin",
+    reservas_reservadas : "reservas_reservadas/",
     cabanas : "cabanas",
     all_gallery : "all_gallery",
     all_gallery3d : "all_gallery3d",

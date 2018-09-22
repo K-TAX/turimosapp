@@ -15,7 +15,7 @@ middlewares.push(logger);
 const persistConfig = {
   key: 'root',
   storage,
-  blacklist : ["ui","auth"]
+  blacklist : ["ui","cabanas","reservas"]
 }
 
 const persistedReducer = persistReducer(persistConfig, reducers)

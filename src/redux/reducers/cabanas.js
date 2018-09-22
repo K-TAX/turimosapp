@@ -1,7 +1,7 @@
 import _ from 'lodash'
 
 const initialState= {
-    cabanas : null
+    cabanas : []
 }
 
 export default (state = _.cloneDeep(initialState), action) => {

@@ -1,6 +1,7 @@
 import React, { Component } from 'react'
 import { Text, View } from 'react-native'
 import tabBarIcon from '../services/tabBarIcon'
+import DateRangePicker from '../components/DateRangePicker'
 
 export class CampingScreen extends Component {
   static navigationOptions = {
@@ -10,7 +11,10 @@ export class CampingScreen extends Component {
   render() {
     return (
       <View>
-        <Text> CampingScreen </Text>
+         <DateRangePicker
+          initialRange={['2018-04-01', '2018-04-10']}
+          onSuccess={(s, e) => alert(s + '||' + e)}
+          theme={{ markColor: 'red', markTextColor: 'white' }}/>
       </View>
     )
   }

@@ -1,33 +1,23 @@
 import React, { Component } from 'react'
 import { StyleSheet,Image,ActivityIndicator,View } from 'react-native'
-import {createStackNavigator} from 'react-navigation'
 import { Container, Content, Card, CardItem, Thumbnail, Text, Button, Icon, Left, Body, Right } from 'native-base';
 import tabBarIcon from '../services/tabBarIcon'
-import {httpGet} from '../services/servicesHttp'
-import {ENDPOINTS,SERVER} from '../constants'
+import {SERVER} from '../constants'
+import {connect} from 'react-redux'
+import {numberToClp} from 'chilean-formatter'
 
 
 class CabanasScreen extends Component {
   static navigationOptions = {
     title : "Cabañas",
-    tabBarColor: '#1c313a',
+    tabBarColor: '#004d40',
     tabBarIcon: tabBarIcon('home')
   };
-  state = {
-    cabanas : []
-  }
-  componentDidMount(){
-    httpGet(ENDPOINTS.cabanas).then(({data : cabanas,status})=>{
-      if(status === 200){
-        this.setState({cabanas})
-      }
-    })
-  }
   render() {
-    const {cabanas} = this.state;
+    const {cabanas} = this.props;
     return (
       <Container style={styles.root}>
-        {cabanas.length === 0 ? 
+        {!cabanas ? 
         (<View style={styles.loading}>
           <ActivityIndicator size="large" />
         </View>) :
@@ -39,7 +29,7 @@ class CabanasScreen extends Component {
                   <Thumbnail source={{uri: `${SERVER.server}/${cabana.Main}`}} />
                   <Body>
                     <Text>{cabana.Nombre}</Text>
-                    <Text note>{`Precio : ${cabana.Precio}`}</Text>
+                    <Text note>{`Precio : ${numberToClp(cabana.Precio)}`}</Text>
                   </Body>
                 </Left>
               </CardItem>
@@ -82,4 +72,9 @@ const styles = StyleSheet.create({
     alignItems : 'center'
   }
 })
-export default CabanasScreen
+
+const mapStateToProps = state => ({
+  cabanas  : state.cabanas.cabanas
+})
+
+export default connect(mapStateToProps)(CabanasScreen)

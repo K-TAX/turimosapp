@@ -1,8 +1,19 @@
 {
   "expo": {
+    "name": "TurismApp",
+    "icon": "./assets/icons/icon.png",
     "sdkVersion": "27.0.0",
+    "version": "1.0.0",
     "androidStatusBar": {
       "backgroundColor": "#000000"
-    }
+    },
+    "ios": {
+      "bundleIdentifier": "com.groupbi.turismapp"
+    },
+    "android": {
+      "package": "com.groupbi.turismapp"
+    },
+    "slug": "turismapp",
+    "description": ""
   }
 }

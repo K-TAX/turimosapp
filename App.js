@@ -1,6 +1,6 @@
 import React from 'react';
-import { StyleSheet, View,StatusBar,TouchableOpacity,Platform } from 'react-native';
-import { Root,StyleProvider,Icon } from 'native-base';
+import { StyleSheet, View,Platform } from 'react-native';
+import { Root,StyleProvider,Icon,Thumbnail,Text } from 'native-base';
 import storeConfig from './src/redux/storeConfig'
 import {Provider} from 'react-redux'
 import { PersistGate } from 'redux-persist/integration/react'
@@ -8,24 +8,44 @@ import getTheme from './native-base-theme/components';
 import commonColor from './native-base-theme/variables/commonColor';
 import { 
   createSwitchNavigator,
-  createDrawerNavigator,
   createStackNavigator,
-  SafeAreaView } from 'react-navigation';
+   } from 'react-navigation';
 import Expo from 'expo'
+import { MenuProvider } from 'react-native-popup-menu';
+import {
+  Menu,
+  MenuOptions,
+  MenuOption,
+  MenuTrigger,
+} from 'react-native-popup-menu';
+import {cleanUserSession} from './src/redux/actions/auth'
+import {LocaleConfig} from 'react-native-calendars';
+import moment from 'moment'
 import {createMaterialBottomTabNavigator} from 'react-navigation-material-bottom-tabs'
 import AuthLoadingScreen from './src/screens/AuthLoadingScreen';
 import SignInScreen from './src/screens/SignInScreen';
-import CabanasScreen from './src/screens/CabanasScreen';
-import CabanaDetailScreen from './src/screens/CabanaDetailScreen';
 import CabanaReservasScreen from './src/screens/CabanaReservasScreen';
-import CampingScreen from './src/screens/CampingScreen';
+import HomeScreen from './src/screens/HomeScreen';
+import ReservasScreen from './src/screens/ReservasScreen';
+import 'moment/locale/es';
+
+moment.locale('es');
+
+LocaleConfig.locales['es'] = {
+  monthNames: ['Enero','Febrero','Marzo','Abril','Mayo','Junio','Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre'],
+  monthNamesShort: ['Ene.','Feb.','Mar','Abr','May','Jun','Jul.','Ago','Sep.','Oct.','Nov.','Dic.'],
+  dayNames: ['Domingo','Lunes','Martes','Miercoles','Jueves','Viernes','Sabado'],
+  dayNamesShort: ['Dom.','Lun.','Mar.','Mie.','Jue.','Vie.','Sab.']
+};
+
+LocaleConfig.defaultLocale = 'es';
 
 const AppTabNavigator = createMaterialBottomTabNavigator({
-  Cabanas : {screen : CabanasScreen},
-  Camping : {screen : CampingScreen}
+  Principal : {screen : HomeScreen},
+  Reservas : {screen : ReservasScreen}
 },
 {
-  initialRouteName: 'Cabanas',
+  initialRouteName: 'Principal',
   shifting: true,
   activeColor: 'white',
 })
@@ -33,73 +53,73 @@ AppTabNavigator.navigationOptions = ({ navigation }) => {
   let { routeName } = navigation.state.routes[navigation.state.index];
 
   let headerTitle = routeName;
-  if(routeName === "Cabanas") headerTitle = "Cabañas";
-
+  if(routeName === "Principal") headerTitle = "Turismo El Encuentro";
   return {
-    headerTitle,
+    headerTitle : (<Text style={{color : 'white'}}>{headerTitle}</Text>),
   };
 };
 const AppStackNavigator = createStackNavigator({
   AppTabNavigator : {
     screen : AppTabNavigator,
     navigationOptions : ({navigation})=>({
-      title : "Turismo El Encuentro",
       headerLeft : (
-        <TouchableOpacity onPress={()=>navigation.toggleDrawer()}>
-          <View style={{paddingHorizontal : 15}}>
-            <Icon name="menu" fontSize={24} style={{color : 'white'}} />
-          </View>
-        </TouchableOpacity>
+        <Thumbnail 
+        source={require("./assets/icons/icon.png")} 
+        style={{height : 40,width : 40}} />
       ),
-      headerStyle : {
-        marginTop : Platform.OS === "android" ?  -Expo.Constants.statusBarHeight : 0,
-        backgroundColor : '#282828'
-      }
+      headerRight : (
+        <Menu >
+          <MenuTrigger>
+            <Icon style={{color : 'white'}} type="MaterialIcons" name="more-vert" />
+          </MenuTrigger>
+          <MenuOptions>
+            <MenuOption onSelect={() =>{
+              storeConfig.store.dispatch(cleanUserSession());
+              navigation.navigate("Auth");
+              }} >
+              <View style={{flexDirection : 'row',alignItems : 'center'}}>
+                <Icon type="MaterialIcons" name="exit-to-app" />
+                <Text>Salir</Text>
+              </View>
+            </MenuOption>
+          </MenuOptions>
+        </Menu>
+      )
     })
-  },
-  CabanaDetailScreen : {
-    screen : CabanaDetailScreen,
-    navigationOptions : {
-      
-    }
   },
   CabanaReservasScreen : {
     screen : CabanaReservasScreen
   }
 },{
+  mode : "modal",
   navigationOptions : {
-    headerStyle: { 
-      position: 'absolute',
+    headerStyle : {
+      paddingHorizontal : 12,
       marginTop : Platform.OS === "android" ?  -Expo.Constants.statusBarHeight : 0,
-      backgroundColor: 'transparent',
-      zIndex: 100,
-      top: 0,
-      left: 0,
-      right: 0 
+      backgroundColor : '#282828'
     },
+    gesturesEnabled : true,
     headerTintColor: 'white'
   }
-})
-
-const AppDrawerNavigator = createDrawerNavigator({
-  Home : AppStackNavigator
 })
 
 const AppNavigator = createSwitchNavigator({
   AuthLoading : AuthLoadingScreen,
   Auth : SignInScreen,
-  App : AppDrawerNavigator
+  App : AppStackNavigator
 })
 
 export default ()=> (
       <Provider store={storeConfig.store}>
         <PersistGate persistor={storeConfig.persistor}>
             <StyleProvider style={getTheme(commonColor)}> 
-              <View style={styles.container}>
-                <Root>
-                  <AppNavigator />
-                </Root>
-              </View>
+              <MenuProvider>
+                <View style={styles.container}>
+                  <Root>
+                    <AppNavigator />
+                  </Root>
+                </View>
+              </MenuProvider>
             </StyleProvider>
         </PersistGate>
       </Provider>
