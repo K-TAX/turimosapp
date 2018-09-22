@@ -4,16 +4,19 @@ import storeConfig from '../../redux/storeConfig'
 
 export const fetchReservasAdmin = ()=>{
     const state = storeConfig.store.getState();
-    return (dispatch) => {
-        httpGet(ENDPOINTS.reservas_admin,null,state.auth.accessToken).then(({data,status})=>{
-            if(status === 200){
-                dispatch({
-                    type : "FETCH_RESERVAS_ADMIN",
-                    payload : {
-                        reservas_admin : data
-                    }
-                })
-            }
+    return async (dispatch) => {
+        await new Promise(resolve=>{
+            httpGet(ENDPOINTS.reservas_admin,null,state.auth.accessToken).then(({data,status})=>{
+                if(status === 200){
+                    dispatch({
+                        type : "FETCH_RESERVAS_ADMIN",
+                        payload : {
+                            reservas_admin : data
+                        }
+                    })
+                }
+                resolve()
+            })
         })
     }
 }
