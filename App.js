@@ -1,5 +1,5 @@
 import React from 'react';
-import { StyleSheet, View,Platform } from 'react-native';
+import { StyleSheet, View,Platform,StatusBar } from 'react-native';
 import { Root,StyleProvider,Icon,Thumbnail,Text } from 'native-base';
 import storeConfig from './src/redux/storeConfig'
 import {Provider} from 'react-redux'
@@ -115,6 +115,7 @@ export default ()=> (
             <StyleProvider style={getTheme(commonColor)}> 
               <MenuProvider>
                 <View style={styles.container}>
+                  <StatusBar backgroundColor="#000000" />
                   <Root>
                     <AppNavigator />
                   </Root>
