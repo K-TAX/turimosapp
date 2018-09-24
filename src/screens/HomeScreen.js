@@ -146,11 +146,11 @@ export class HomeScreen extends Component {
                         >
                         <Left style={{position : 'relative'}}>
                           <Thumbnail 
-                          style={{width : 20,height : 20,position : 'absolute',top : 6}} 
+                          style={{width : 30,height : 30,position : 'absolute',top : 6}} 
                           source={{uri: `${SERVER.server}/${cabana.Main}`}} />
                         </Left>
                         <Body>
-                          <Text style={{fontSize : 9,marginLeft : 15}}>{cabana.Nombre}</Text>
+                          <Text style={{fontSize : 10,marginLeft : 18}}>{cabana.Nombre}</Text>
                         </Body>
                         <Right style={{justifyContent : 'center'}}>
                           <Icon name="invert-colors" type="MaterialIcons" 
@@ -189,14 +189,15 @@ const styles = StyleSheet.create({
    flex : 1,
   },
   listContainer : {
+    justifyContent : 'flex-end',
     position : 'absolute',
-    bottom : 64,
+    bottom : 55,
     left : 0,
     right : 0,
-    height : heightScreen * 0.20
+    height : heightScreen * 0.25
   },
   listItem : {
-    maxHeight : 30
+    maxHeight : 40
   }
 })
 const mapStateToProps = state => ({

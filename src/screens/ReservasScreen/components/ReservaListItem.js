@@ -11,7 +11,7 @@ class ReservaListItem extends PureComponent{
     const chipColor = item.Estado == 0?"#000":item.Estado == 1?"#fff":item.Estado==2?"#fff":"#000";
     return (<ListItem 
       noIndent
-      onLongPress={()=>openModal()}
+      onLongPress={()=>openModal(item)}
       avatar>
         <Left>
           <Checkbox

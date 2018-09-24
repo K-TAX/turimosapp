@@ -20,6 +20,7 @@ class ReservasScreen extends Component {
     selected : [],
     isReady : false,
     isOpenModal : false,
+    details : {},
     filter : null
   }
   async componentDidMount(){
@@ -47,8 +48,8 @@ class ReservasScreen extends Component {
   isSelected = id => {
     return (this.state.selected.indexOf(id) !== -1) ? "checked" : "unchecked"
   }
-  openModal = ()=>{
-    this.setState({ isOpenModal : true})
+  openModal = (details)=>{
+    this.setState({ isOpenModal : true,details})
   }
   closeModal = ()=>{
     this.setState({ isOpenModal : false})
@@ -86,7 +87,7 @@ class ReservasScreen extends Component {
   }
   render() {
     const {reservas_admin} = this.props;
-    const {selected,isReady,isOpenModal,filter} = this.state;
+    const {selected,isReady,isOpenModal,filter,details} = this.state;
     return (
     <Container 
       style={styles.root}>
@@ -115,7 +116,7 @@ class ReservasScreen extends Component {
       <ModalWrapper
       onRequestClose={this.closeModal}
       visible={isOpenModal}>
-        <ReservaDetail />
+        <ReservaDetail details={details} />
       </ModalWrapper>
     </Container>
     )
