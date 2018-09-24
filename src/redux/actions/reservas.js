@@ -1,6 +1,7 @@
 import {httpGet, httpPost,httpDelete} from '../../services/servicesHttp'
 import {ENDPOINTS} from '../../constants'
 import storeConfig from '../../redux/storeConfig'
+import {Toast} from 'native-base'
 
 export const fetchReservasAdmin = ()=>{
     const state = storeConfig.store.getState();
@@ -50,8 +51,14 @@ export const cambioEstadoReserva = (selected,estado)=>{
                         dispatch({
                             type : "CAMBIO_ESTADO_RESERVA",
                             payload : {
-                                reservas_admin : data
+                                reservas_admin : data.data
                             }
+                        })
+                        Toast.show({
+                            type : data.success ? "success" : "warning",
+                            text : data.message,
+                            position : "top",
+                            duration : data.success ? 3000 : 6800
                         })
                     }
                     resolve()

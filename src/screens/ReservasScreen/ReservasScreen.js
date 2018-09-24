@@ -1,10 +1,10 @@
 import React, { Component } from 'react'
 import { StyleSheet,View,ActivityIndicator,FlatList} from 'react-native'
-import { Container, Content } from 'native-base';
+import { Container,Toast } from 'native-base';
 import tabBarIcon from '../../services/tabBarIcon'
 import _ from 'lodash'
 import {connect} from 'react-redux'
-import {fetchReservasAdmin} from '../../redux/actions/reservas'
+import {fetchReservasAdmin,limpiarReservasAnuladas,cambioEstadoReserva} from '../../redux/actions/reservas'
 import ModalWrapper from 'react-native-modal-wrapper';
 import ReservaListItem from './components/ReservaListItem'
 import ReservaDetail from './components/ReservaDetail'
@@ -67,6 +67,23 @@ class ReservasScreen extends Component {
   handleChangeFilter = (filter)=>{
     this.setState({filter})
   }
+  handleUpdateReservas = async ()=>{
+    await this.props.fetchReservasAdmin();
+    Toast.show({
+      type : "success",
+      text : "Reservas Actualizadas.",
+      position : "top",
+      duration : 2000
+    })
+  }
+  handleCleanReservasAnuladas = ()=>{
+     this.props.limpiarReservasAnuladas();
+  }
+  handleCambioEstadoReserva = async (estado)=>{
+    const {selected} = this.state;
+     await this.props.cambioEstadoReserva(selected,estado);
+     this.setState({selected : []})
+  }
   render() {
     const {reservas_admin} = this.props;
     const {selected,isReady,isOpenModal,filter} = this.state;
@@ -79,6 +96,9 @@ class ReservasScreen extends Component {
         filter={filter}
         selected={selected}
         handleChangeFilter={this.handleChangeFilter}
+        handleUpdateReservas={this.handleUpdateReservas}
+        handleCleanReservasAnuladas={this.handleCleanReservasAnuladas}
+        handleCambioEstadoReserva={this.handleCambioEstadoReserva}
         />
         <FlatList 
           data={filter === null ? reservas_admin : _.filter(reservas_admin,x=>x.Estado === filter.toString())}
@@ -120,7 +140,9 @@ const mapStateToProps = state => ({
   reservas_admin  : state.reservas.reservas_admin
 })
 const mapDispatchToProps = dispatch => ({
-  fetchReservasAdmin  :  ()=>dispatch(fetchReservasAdmin())
+  fetchReservasAdmin  :  ()=>dispatch(fetchReservasAdmin()),
+  limpiarReservasAnuladas  :  ()=>dispatch(limpiarReservasAnuladas()),
+  cambioEstadoReserva : (selected,estado)=>dispatch(cambioEstadoReserva(selected,estado))
 })
 
 export default connect(mapStateToProps,mapDispatchToProps)(ReservasScreen)
