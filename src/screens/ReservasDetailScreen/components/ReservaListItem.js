@@ -6,12 +6,12 @@ import moment from 'moment'
 
 class ReservaListItem extends PureComponent{
     render(){
-    const { item,isSelected,handleCheckedItem,handlePressItem} = this.props;
+    const { item,isSelected,handleCheckedItem,openModal} = this.props;
     const chipBackgroundColor = item.Estado == 0?"#e0e0e0":item.Estado == 1?"#00C853":item.Estado==2?"#EF5350":"#e0e0e0";
     const chipColor = item.Estado == 0?"#000":item.Estado == 1?"#fff":item.Estado==2?"#fff":"#000";
     return (<ListItem 
       noIndent
-      onPress={()=>handlePressItem(item)}
+      onLongPress={()=>openModal(item)}
       avatar>
         <Left>
           <Checkbox

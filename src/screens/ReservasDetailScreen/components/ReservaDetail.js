@@ -1,6 +1,6 @@
 import React, { Component } from 'react'
 import {View,Dimensions,StyleSheet,ScrollView,TouchableOpacity } from 'react-native'
-import {Container,Text,Thumbnail,Icon} from 'native-base'
+import {Text,Thumbnail,Icon} from 'native-base'
 import {Title,Appbar} from 'react-native-paper'
 import moment from 'moment'
 import {connect} from 'react-redux'
@@ -64,7 +64,7 @@ export class ReservaDetail extends Component {
       return row;
     })
     return (
-      <Container style={styles.root}>
+      <View style={styles.root}>
         <Appbar style={styles.appbar}>
           <Title>Detalles Reserva</Title>
           <Text style={{position : 'absolute',bottom : 0,right : 15}} note>
@@ -96,7 +96,7 @@ export class ReservaDetail extends Component {
             </Table>
           </ScrollView>
         </View>
-      </Container>
+      </View>
     )
   }
 }

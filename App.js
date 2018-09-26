@@ -1,6 +1,7 @@
 import React from 'react';
 import { StyleSheet, View,Platform,StatusBar } from 'react-native';
 import { Root,StyleProvider,Icon,Thumbnail,Text } from 'native-base';
+import { Portal } from 'react-native-paper';
 import storeConfig from './src/redux/storeConfig'
 import {Provider} from 'react-redux'
 import { PersistGate } from 'redux-persist/integration/react'
@@ -27,6 +28,7 @@ import SignInScreen from './src/screens/SignInScreen';
 import CabanaReservasScreen from './src/screens/CabanaReservasScreen';
 import HomeScreen from './src/screens/HomeScreen';
 import ReservasScreen from './src/screens/ReservasScreen';
+import ReservasDetailScreen from './src/screens/ReservasDetailScreen';
 import 'moment/locale/es';
 
 moment.locale('es');
@@ -89,6 +91,9 @@ const AppStackNavigator = createStackNavigator({
   },
   CabanaReservasScreen : {
     screen : CabanaReservasScreen
+  },
+  ReservasDetailScreen : {
+    screen : ReservasDetailScreen
   }
 },{
   mode : "modal",
@@ -117,7 +122,9 @@ export default ()=> (
                 <View style={styles.container}>
                   <StatusBar backgroundColor="#000000" />
                   <Root>
-                    <AppNavigator />
+                    <Portal.Host>
+                      <AppNavigator />
+                    </Portal.Host>
                   </Root>
                 </View>
               </MenuProvider>

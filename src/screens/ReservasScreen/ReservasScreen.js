@@ -5,7 +5,6 @@ import tabBarIcon from '../../services/tabBarIcon'
 import _ from 'lodash'
 import {connect} from 'react-redux'
 import {fetchReservasAdmin,limpiarReservasAnuladas,cambioEstadoReserva} from '../../redux/actions/reservas'
-import ModalWrapper from 'react-native-modal-wrapper';
 import ReservaListItem from './components/ReservaListItem'
 import ReservaDetail from './components/ReservaDetail'
 import ReservaToolbar from './components/ReservaToolbar'
@@ -19,8 +18,6 @@ class ReservasScreen extends Component {
   state = {
     selected : [],
     isReady : false,
-    isOpenModal : false,
-    details : {},
     filter : null
   }
   async componentDidMount(){
@@ -47,19 +44,16 @@ class ReservasScreen extends Component {
   }
   isSelected = id => {
     return (this.state.selected.indexOf(id) !== -1) ? "checked" : "unchecked"
-  }
-  openModal = (details)=>{
-    this.setState({ isOpenModal : true,details})
-  }
-  closeModal = ()=>{
-    this.setState({ isOpenModal : false})
+  } 
+  handlePressItem = (details)=>{
+    this.props.navigation.navigate("ReservasDetailScreen",details)
   }
   _renderItem = ({item,index})=>{
     const isSelected = this.isSelected(item.Id);
     return (
       <ReservaListItem 
       item={item} 
-      openModal={this.openModal}
+      handlePressItem={this.handlePressItem}
       isSelected={isSelected}
       handleCheckedItem={this.handleCheckedItem}
        />
@@ -113,11 +107,6 @@ class ReservasScreen extends Component {
         <ActivityIndicator size="large" />
       </View>
       }
-      <ModalWrapper
-      onRequestClose={this.closeModal}
-      visible={isOpenModal}>
-        <ReservaDetail details={details} />
-      </ModalWrapper>
     </Container>
     )
   }
