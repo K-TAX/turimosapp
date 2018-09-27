@@ -1,7 +1,7 @@
 import React, { Component } from 'react'
 import { StyleSheet, View,ActivityIndicator,Dimensions } from 'react-native'
 import tabBarIcon from '../services/tabBarIcon'
-import { Container,Thumbnail, List, ListItem, Body,Left, Right,Text,Icon,Row,Col,Separator  } from 'native-base';
+import { Container,Thumbnail, List, ListItem, Body,Left, Right,Text,Icon,Grid,Row,Col,Separator,Content  } from 'native-base';
 import {CalendarList } from 'react-native-calendars'
 import moment from 'moment'
 import {connect} from 'react-redux'
@@ -112,58 +112,58 @@ export class HomeScreen extends Component {
     return (
       <Container style={styles.root}>
         {isReady ?
-          <View style={{flex : 1}}>
-            <View style={styles.calendarContainer}>
+          <Content>
               <CalendarList
               onDayPress={(day)=>alert(JSON.stringify(day))}
               horizontal
               pastScrollRange={0}
               futureScrollRange={50}
-              calendarHeight={heightScreen * 0.80}
+              style={{flex : 1}}
+              calendarHeight={390}
               minDate={moment(moment.now()).format("YYYY-MM-DD")}
               pagingEnabled
               markingType='multi-period'
               showScrollIndicator
+              firstDay={1}
               markedDates={{
                 ...allReservas
               }}
               />
-            </View>
-            <View style={styles.listContainer}>
             <Separator style={{maxHeight : 1}} />
-              <Row>
-                {_.chunk(cabanas,2).map((item,i)=>(
-                <Col style={{}} key={i}>
-                  <List>
-                    {item.map(cabana=>(
-                      <ListItem 
-                        button 
-                        avatar
-                        noBorder
-                        key={cabana.Id} 
-                        onPress={()=>this.props.navigation.navigate("CabanaReservasScreen",cabana)}
-                        style={styles.listItem}
-                        >
-                        <Left style={{position : 'relative'}}>
-                          <Thumbnail 
-                          style={{width : 30,height : 30,position : 'absolute',top : 6}} 
-                          source={{uri: `${SERVER.server}/${cabana.Main}`}} />
-                        </Left>
-                        <Body>
-                          <Text style={{fontSize : 10,marginLeft : 18}}>{cabana.Nombre}</Text>
-                        </Body>
-                        <Right style={{justifyContent : 'center'}}>
-                          <Icon name="invert-colors" type="MaterialIcons" 
-                          style={{color : colors[cabana.Id],fontSize : 15}}/>
-                        </Right>
-                      </ListItem>
-                    ))}
-                  </List> 
-                </Col>
-                ))}
-              </Row>
-            </View>
-          </View>
+              <Grid>
+                <Row>
+                  {_.chunk(cabanas,2).map((item,i)=>(
+                  <Col style={{}} key={i}>
+                    <List>
+                      {item.map(cabana=>(
+                        <ListItem 
+                          button 
+                          avatar
+                          noBorder
+                          key={cabana.Id} 
+                          onPress={()=>this.props.navigation.navigate("CabanaReservasScreen",cabana)}
+                          style={styles.listItem}
+                          >
+                          <Left style={{position : 'relative'}}>
+                            <Thumbnail 
+                            style={{width : 30,height : 30,position : 'absolute',top : 6}} 
+                            source={{uri: `${SERVER.server}/${cabana.Main}`}} />
+                          </Left>
+                          <Body>
+                            <Text style={{fontSize : 10,marginLeft : 18}}>{cabana.Nombre}</Text>
+                          </Body>
+                          <Right style={{justifyContent : 'center'}}>
+                            <Icon name="invert-colors" type="MaterialIcons" 
+                            style={{color : colors[cabana.Id],fontSize : 15}}/>
+                          </Right>
+                        </ListItem>
+                      ))}
+                    </List> 
+                  </Col>
+                  ))}
+                </Row>
+              </Grid>
+          </Content>
         : (
         <View style={styles.loading}>
           <ActivityIndicator size="large" />
@@ -177,24 +177,12 @@ export class HomeScreen extends Component {
 const styles = StyleSheet.create({
   root : {
     position : 'relative',
-    flex : 1,
-    minHeight : heightScreen 
+    flex : 1
   },
   loading : {
     minHeight : heightScreen - heightScreen * 0.20,
     justifyContent : 'center',
     alignItems : 'center'
-  },
-  calendarContainer : {
-   flex : 1,
-  },
-  listContainer : {
-    justifyContent : 'flex-end',
-    position : 'absolute',
-    bottom : 55,
-    left : 0,
-    right : 0,
-    height : heightScreen * 0.25
   },
   listItem : {
     maxHeight : 40

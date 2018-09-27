@@ -1,7 +1,7 @@
 import React, { Component } from 'react'
-import {View,StyleSheet,ScrollView,AlertAndroid } from 'react-native'
+import {View,StyleSheet,ScrollView,TouchableOpacity } from 'react-native'
 import {Container,Text,Thumbnail,Icon,Row,Col,Grid,Item,Input,Button,Label} from 'native-base'
-import {Title,Appbar,Chip,FAB } from 'react-native-paper'
+import {Title,Appbar,Chip,FAB,TouchableRipple } from 'react-native-paper'
 import moment from 'moment'
 import {connect} from 'react-redux'
 import _ from 'lodash'
@@ -158,14 +158,16 @@ export class ReservasDetailScreen extends Component {
                     <Text style={{fontSize : 12}}>Monto Abonado</Text>
                   </Row>
                 </Col>
-                <Col style={{alignItems : 'center'}}>
-                  <Row>
-                    <Text style={{fontWeight : 'bold'}}>0</Text>
-                  </Row>
-                  <Row>
-                    <Text style={{fontSize : 12}}>Cantidad Abonos</Text>
-                  </Row>
-                </Col>
+                <TouchableOpacity style={{flex : 1}}>
+                  <Col style={{alignItems : 'center'}}>
+                    <Row>
+                      <Text style={{fontWeight : 'bold',color : 'blue' }}>0</Text>
+                    </Row>
+                    <Row>
+                      <Text style={{fontSize : 12,color : 'blue'}}>Cantidad Abonos</Text>
+                    </Row>
+                  </Col>
+                </TouchableOpacity>
               </Row>
             </Grid>
             <Row style={{padding : 10}}>
@@ -203,7 +205,7 @@ export class ReservasDetailScreen extends Component {
               <View style={{flexDirection : 'row',position : 'absolute', top : -30,right : 10}}>
                 <Button 
                 onPress={()=>this.setState({abonoMontoInput : (parseInt(cabana.Precio * 0.30) * days).toString()})}
-                style={{marginRight : 10}} 
+                style={{marginRight : 10}}
                 light 
                 rounded>
                   <Text>30%</Text>
