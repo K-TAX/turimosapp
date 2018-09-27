@@ -1,12 +1,12 @@
 import React, { Component } from 'react'
 import {View,StyleSheet,ScrollView,TouchableOpacity } from 'react-native'
-import {Container,Text,Thumbnail,Icon,Row,Col,Grid,Item,Input,Button,Label} from 'native-base'
-import {Title,Appbar,Chip,FAB,TouchableRipple } from 'react-native-paper'
+import {Container,Text,Thumbnail,Icon,Row,Col,Grid,Item,Input,Button,Label,Content} from 'native-base'
+import {Title,Appbar,Chip,Button as ButtonPaper } from 'react-native-paper'
 import moment from 'moment'
 import {connect} from 'react-redux'
 import _ from 'lodash'
 import {SERVER} from '../../constants'
-import { Table,TableWrapper,Row as TableRow } from 'react-native-table-component';
+import Expo from 'expo';
 import {enumerateDaysBetweenDates} from '../../services/dateServices'
 import {numberToClp} from 'chilean-formatter'
 import { Dialog, Portal } from 'react-native-paper';
@@ -16,6 +16,7 @@ export class ReservasDetailScreen extends Component {
     title : "Detalles Reserva"
   }
   state = {
+    contentScroll : true,
     dialogOpen : false,
     abonoMontoInput : '',
     montoAbonado : 0
@@ -29,7 +30,7 @@ export class ReservasDetailScreen extends Component {
   }
   render() {
     const {params : details} = this.props.navigation.state;
-    const {abonoMontoInput,montoAbonado} = this.state;
+    const {abonoMontoInput,montoAbonado,contentScroll} = this.state;
     const chipBackgroundColor = details.Estado == 0?"#e0e0e0":details.Estado == 1?"#00C853":details.Estado==2?"#EF5350":"#e0e0e0";
     const chipColor = details.Estado == 0?"#000":details.Estado == 1?"#fff":details.Estado==2?"#fff":"#000";
     const cabana = _.find(this.props.cabanas,c=>c.Id === details.Cabana);
@@ -61,183 +62,191 @@ export class ReservasDetailScreen extends Component {
             {moment(details["Registro"]).format("lll")}</Text>
           </View>
         </Appbar>
-        <View style={styles.content}>
-          <View style={styles.first}>
-            <Grid>
-              <Row style={{ height: 35,position : 'relative' }}>
+        <Content scrollEnabled={contentScroll} padder>
+          <Grid>
+            <Row style={{ height: 35,position : 'relative' }}>
+              <View style={{flexDirection : 'row',alignItems : 'center'}}>
+                <Icon name="person" type="MaterialIcons" />
+                <Title style={{marginLeft : 15}}>{details.Cliente.toUpperCase()}</Title>
+              </View>
+              <Chip 
+              style={{backgroundColor : chipBackgroundColor,
+              height : 25,
+              position : 'absolute',
+              right : 10,
+              bottom : 10,
+              justifyContent : 'center'}}>
+                <Text style={{color : chipColor,fontSize : 10}}>
+                {details.Estado == 0?"Pendiente":details.Estado == 1?"Reservado":details.Estado==2?"Anulado":""}
+                </Text>
+              </Chip>
+            </Row>
+            <Row style={{ height: 50}}>
+              <Col style={{ justifyContent: 'center'}}>
                 <View style={{flexDirection : 'row',alignItems : 'center'}}>
-                  <Icon name="person" type="MaterialIcons" />
-                  <Title style={{marginLeft : 15}}>{details.Cliente.toUpperCase()}</Title>
+                  <Icon name="email" type="MaterialIcons" style={{fontSize : 16}} />
+                  <Text note numberOfLines={2} style={{marginLeft : 10,fontSize : 12}}>{details.Email}</Text>
                 </View>
-                <Chip 
-                style={{backgroundColor : chipBackgroundColor,
-                height : 25,
-                position : 'absolute',
-                right : 10,
-                bottom : 10,
-                justifyContent : 'center'}}>
-                  <Text style={{color : chipColor,fontSize : 10}}>
-                  {details.Estado == 0?"Pendiente":details.Estado == 1?"Reservado":details.Estado==2?"Anulado":""}
-                  </Text>
-                </Chip>
-              </Row>
-              <Row style={{ height: 50}}>
-                <Col style={{ justifyContent: 'center'}}>
-                  <View style={{flexDirection : 'row',alignItems : 'center'}}>
-                    <Icon name="email" type="MaterialIcons" style={{fontSize : 16}} />
-                    <Text note numberOfLines={2} style={{marginLeft : 10,fontSize : 12}}>{details.Email}</Text>
-                  </View>
-                </Col>
-                <Col style={{ justifyContent: 'center'}}>
-                  <View style={{flexDirection : 'row',alignItems : 'center',justifyContent : 'center'}}>
-                    <Icon name="phone" type="MaterialIcons" style={{fontSize : 16}}/>
-                    <Text note style={{marginLeft : 10}}>{details.Telefono}</Text>
-                  </View>
-                </Col>
-              </Row>
-              <Row style={{ height: 35 }}>
-                <View style={{flexDirection : 'row',alignItems : 'center'}}>
-                  <Icon name="date-range" type="MaterialIcons" style={{fontSize : 16}} />
-                  <Text style={{marginLeft : 15}}>{`${details.Llegada} a ${details.Salida}`}</Text>
+              </Col>
+              <Col style={{ justifyContent: 'center'}}>
+                <View style={{flexDirection : 'row',alignItems : 'center',justifyContent : 'center'}}>
+                  <Icon name="phone" type="MaterialIcons" style={{fontSize : 16}}/>
+                  <Text note style={{marginLeft : 10}}>{details.Telefono}</Text>
                 </View>
-              </Row>
-              <Row style={{ marginTop : 10,padding : 10 ,borderWidth : 1,borderColor : 'lightgray',position : 'relative' }}>
-                <ScrollView>
+              </Col>
+            </Row>
+            <Row style={{ height: 35 }}>
+              <View style={{flexDirection : 'row',alignItems : 'center'}}>
+                <Icon name="date-range" type="MaterialIcons" style={{fontSize : 16}} />
+                <Text style={{marginLeft : 15}}>{`${details.Llegada} a ${details.Salida}`}</Text>
+              </View>
+            </Row>
+            <Row 
+            style={{height : 100,marginTop : 10,padding : 10 ,borderWidth : 1,borderColor : 'lightgray',position : 'relative' }}>
+              <ScrollView horizontal>
+                <ScrollView 
+                nestedScrollEnabled
+                >
                   <Text>
                     {details.Mensaje}
                   </Text>
                 </ScrollView>
-                <Icon style={{position : 'absolute',zIndex : -1,opacity: .05,fontSize : 100,top: 0,right : 30}} 
-                  type="Ionicons" 
-                  name="ios-mail-outline" />
-              </Row>
-            </Grid>
-          </View>
-          <View style={styles.second}>
-            <Grid>
-              <Row style={{height : 50}}>
+              </ScrollView>
+              <Icon style={{position : 'absolute',zIndex : -1,opacity: .05,fontSize : 100,top: 0,right : 30}} 
+                type="Ionicons" 
+                name="ios-mail-outline" />
+            </Row>
+          </Grid>
+          <Grid style={{marginTop : 25}}>
+            <Row style={{height : 50}}>
+              <Col style={{alignItems : 'center'}}>
+                <Row>
+                  <Text style={{fontWeight : 'bold'}}>{days + " Días"}</Text>
+                </Row>
+                <Row>
+                  <Text style={{fontSize : 12}}>Estadia</Text>
+                </Row>
+              </Col>
+              <Col style={{alignItems : 'center'}}>
+                <Row>
+                  <Text style={{fontWeight : 'bold'}}>{numberToClp(cabana.Precio)}</Text>
+                </Row>
+                <Row>
+                  <Text style={{fontSize : 12}}>Valor Diario</Text>
+                </Row>
+              </Col>
+              <Col style={{alignItems : 'center'}}>
+                <Row>
+                  <Text style={{fontWeight : 'bold'}}>{numberToClp(cabana.Precio * days)}</Text>
+                </Row>
+                <Row>
+                  <Text style={{fontSize : 12}}>Total Estadia</Text>
+                </Row>
+              </Col>
+            </Row>
+            <Row style={{height : 50}}>
+              <Col style={{alignItems : 'center'}}>
+                <Row>
+                  <Text style={{fontWeight : 'bold'}}>{numberToClp((cabana.Precio * days)*0.30)}</Text>
+                </Row>
+                <Row>
+                  <Text style={{fontSize : 12}}>30%</Text>
+                </Row>
+              </Col>
+              <Col style={{alignItems : 'center'}}>
+                <Row>
+                  <Text style={{fontWeight : 'bold'}}>{numberToClp(montoAbonado)}</Text>
+                </Row>
+                <Row>
+                  <Text style={{fontSize : 12}}>Monto Abonado</Text>
+                </Row>
+              </Col>
+              <TouchableOpacity style={{flex : 1}}>
                 <Col style={{alignItems : 'center'}}>
                   <Row>
-                    <Text style={{fontWeight : 'bold'}}>{days + " Días"}</Text>
+                    <Text style={{fontWeight : 'bold',color : 'blue' }}>0</Text>
                   </Row>
                   <Row>
-                    <Text style={{fontSize : 12}}>Estadia</Text>
+                    <Text style={{fontSize : 12,color : 'blue'}}>Cantidad Abonos</Text>
                   </Row>
                 </Col>
-                <Col style={{alignItems : 'center'}}>
-                  <Row>
-                    <Text style={{fontWeight : 'bold'}}>{numberToClp(cabana.Precio)}</Text>
-                  </Row>
-                  <Row>
-                    <Text style={{fontSize : 12}}>Valor Diario</Text>
-                  </Row>
-                </Col>
-                <Col style={{alignItems : 'center'}}>
-                  <Row>
-                    <Text style={{fontWeight : 'bold'}}>{numberToClp(cabana.Precio * days)}</Text>
-                  </Row>
-                  <Row>
-                    <Text style={{fontSize : 12}}>Total Estadia</Text>
-                  </Row>
-                </Col>
-              </Row>
-              <Row style={{height : 50}}>
-                <Col style={{alignItems : 'center'}}>
-                  <Row>
-                    <Text style={{fontWeight : 'bold'}}>{numberToClp((cabana.Precio * days)*0.30)}</Text>
-                  </Row>
-                  <Row>
-                    <Text style={{fontSize : 12}}>30%</Text>
-                  </Row>
-                </Col>
-                <Col style={{alignItems : 'center'}}>
-                  <Row>
-                    <Text style={{fontWeight : 'bold'}}>{numberToClp(montoAbonado)}</Text>
-                  </Row>
-                  <Row>
-                    <Text style={{fontSize : 12}}>Monto Abonado</Text>
-                  </Row>
-                </Col>
-                <TouchableOpacity style={{flex : 1}}>
-                  <Col style={{alignItems : 'center'}}>
-                    <Row>
-                      <Text style={{fontWeight : 'bold',color : 'blue' }}>0</Text>
-                    </Row>
-                    <Row>
-                      <Text style={{fontSize : 12,color : 'blue'}}>Cantidad Abonos</Text>
-                    </Row>
-                  </Col>
-                </TouchableOpacity>
-              </Row>
-            </Grid>
+              </TouchableOpacity>
+            </Row>
+          </Grid>
             <Row style={{padding : 10}}>
-              <View style={{width : '100%',justifyContent : 'space-between'}}>
-                <Button 
-                light={!(montoAbonado === cabana.Precio * days)}
+              <View style={{width : '100%'}}>
+                <ButtonPaper 
+                icon="add"
+                mode="outline"
+                color="blue"
                 disabled={montoAbonado === cabana.Precio * days} 
                 onPress={()=>this.setState({dialogOpen : true})} 
-                style={{alignSelf : 'center'}}>
-                  <Icon name="add" type="MaterialIcons" />
-                  <Text>Agregar Abono</Text>
-                </Button>
-                <View style={{width : '100%',flexDirection : 'row',justifyContent : 'space-around'}}>
-                  <Button danger>
-                    <Icon name="do-not-disturb" type="MaterialIcons" />
-                    <Text>Anular</Text>
-                  </Button>
-                  <Button>
-                    <Icon name="date-range" type="MaterialIcons" />
-                    <Text>Reservar</Text>
-                  </Button>
+                style={{alignSelf : 'center',marginVertical : 10}}>
+                  Agregar Abono
+                </ButtonPaper>
+                <View style={{width : '100%',flexDirection : 'row',justifyContent : 'space-around',marginTop : 25}}>
+                  <ButtonPaper 
+                  icon="do-not-disturb" 
+                  mode="outline" 
+                  color="red" 
+                  onPress={() => console.log('Pressed')}>
+                    Anular
+                  </ButtonPaper>
+                  <ButtonPaper 
+                  icon="date-range"
+                  color="blue" 
+                  mode="outline" 
+                  onPress={() => console.log('Pressed')}>
+                    Reservar
+                  </ButtonPaper>
                 </View>
               </View>
             </Row>
-          </View>
-        </View>
-        <Portal>
-          <Dialog
-            visible={this.state.dialogOpen}
-            onDismiss={this.onDialogClose}>
-            <Dialog.Title>
-              Agregar Abono
-            </Dialog.Title>
-            <Dialog.Content style={{position : 'relative'}}>
-              <View style={{flexDirection : 'row',position : 'absolute', top : -30,right : 10}}>
-                <Button 
-                onPress={()=>this.setState({abonoMontoInput : (parseInt(cabana.Precio * 0.30) * days).toString()})}
-                style={{marginRight : 10}}
-                light 
-                rounded>
-                  <Text>30%</Text>
-                </Button>
-                <Button 
-                 onPress={()=>this.setState({
-                     abonoMontoInput : ((parseInt(cabana.Precio) * days) - montoAbonado).toString()}
-                     )}
-                light 
-                rounded>
-                  <Text>100%</Text>
-                </Button>
-              </View>
-              <Item stackedLabel success={inputAbonoIsSuccess} error={inputAbonoIsError} >
-                <Label>Monto</Label>
-                <Input 
-                renderToHardwareTextureAndroid
-                keyboardType="numeric"
-                onChangeText={abonoMontoInput=>this.setState({abonoMontoInput})}
-                value={abonoMontoInput} />
-              </Item>
-            </Dialog.Content>
-            <Dialog.Actions style={{padding : 10}}>
-              <Button style={{marginEnd : 15}} light onPress={this.onDialogClose}>
-                <Text>Cancelar</Text>
-              </Button>
-              <Button primary onPress={this.abonarMonto}>
-                <Text>Confirmar</Text>
-              </Button>
-            </Dialog.Actions>
-          </Dialog>
-        </Portal>
+            <Portal>
+              <Dialog
+                visible={this.state.dialogOpen}
+                onDismiss={this.onDialogClose}>
+                <Dialog.Title>
+                  Agregar Abono
+                </Dialog.Title>
+                <Dialog.Content style={{position : 'relative'}}>
+                  <View style={{flexDirection : 'row',justifyContent : 'flex-end'}}>
+                    <Button 
+                    onPress={()=>this.setState({abonoMontoInput : (parseInt(cabana.Precio * 0.30) * days).toString()})}
+                    style={{marginRight : 10}}
+                    light 
+                    rounded>
+                      <Text>30%</Text>
+                    </Button>
+                    <Button 
+                    onPress={()=>this.setState({
+                        abonoMontoInput : ((parseInt(cabana.Precio) * days) - montoAbonado).toString()}
+                        )}
+                    light 
+                    rounded>
+                      <Text>100%</Text>
+                    </Button>
+                  </View>
+                  <Item stackedLabel success={inputAbonoIsSuccess} error={inputAbonoIsError} >
+                    <Label>Monto</Label>
+                    <Input 
+                    renderToHardwareTextureAndroid
+                    keyboardType="numeric"
+                    onChangeText={abonoMontoInput=>this.setState({abonoMontoInput})}
+                    value={abonoMontoInput} />
+                  </Item>
+                </Dialog.Content>
+                <Dialog.Actions style={{padding : 10}}>
+                  <Button style={{marginEnd : 15,maxWidth : 120}} light onPress={this.onDialogClose}>
+                    <Text>Cancelar</Text>
+                  </Button>
+                  <Button primary style={{maxWidth : 120}} onPress={this.abonarMonto}>
+                    <Text>Confirmar</Text>
+                  </Button>
+                </Dialog.Actions>
+              </Dialog>
+            </Portal>
+        </Content>
       </Container>
     )
   }
