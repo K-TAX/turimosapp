@@ -16,7 +16,6 @@ export class ReservasDetailScreen extends Component {
     title : "Detalles Reserva"
   }
   state = {
-    contentScroll : true,
     dialogOpen : false,
     abonoMontoInput : '',
     montoAbonado : 0
@@ -30,7 +29,7 @@ export class ReservasDetailScreen extends Component {
   }
   render() {
     const {params : details} = this.props.navigation.state;
-    const {abonoMontoInput,montoAbonado,contentScroll} = this.state;
+    const {abonoMontoInput,montoAbonado} = this.state;
     const chipBackgroundColor = details.Estado == 0?"#e0e0e0":details.Estado == 1?"#00C853":details.Estado==2?"#EF5350":"#e0e0e0";
     const chipColor = details.Estado == 0?"#000":details.Estado == 1?"#fff":details.Estado==2?"#fff":"#000";
     const cabana = _.find(this.props.cabanas,c=>c.Id === details.Cabana);
@@ -62,7 +61,7 @@ export class ReservasDetailScreen extends Component {
             {moment(details["Registro"]).format("lll")}</Text>
           </View>
         </Appbar>
-        <Content scrollEnabled={contentScroll} padder>
+        <Content padder>
           <Grid>
             <Row style={{ height: 35,position : 'relative' }}>
               <View style={{flexDirection : 'row',alignItems : 'center'}}>
@@ -101,17 +100,10 @@ export class ReservasDetailScreen extends Component {
                 <Text style={{marginLeft : 15}}>{`${details.Llegada} a ${details.Salida}`}</Text>
               </View>
             </Row>
-            <Row 
-            style={{height : 100,marginTop : 10,padding : 10 ,borderWidth : 1,borderColor : 'lightgray',position : 'relative' }}>
-              <ScrollView horizontal>
-                <ScrollView 
-                nestedScrollEnabled
-                >
-                  <Text>
-                    {details.Mensaje}
-                  </Text>
-                </ScrollView>
-              </ScrollView>
+            <Row style={{minHeight : 100,marginTop : 10,padding : 10 ,borderWidth : 1,borderColor : 'lightgray',position : 'relative' }}>
+              <Text>
+                {details.Mensaje}
+              </Text>
               <Icon style={{position : 'absolute',zIndex : -1,opacity: .05,fontSize : 100,top: 0,right : 30}} 
                 type="Ionicons" 
                 name="ios-mail-outline" />
@@ -194,7 +186,6 @@ export class ReservasDetailScreen extends Component {
                   </ButtonPaper>
                   <ButtonPaper 
                   icon="date-range"
-                  color="blue" 
                   mode="outline" 
                   onPress={() => console.log('Pressed')}>
                     Reservar

@@ -1,17 +1,22 @@
 import React, { Component } from 'react'
 import { StyleSheet, View,ActivityIndicator,Dimensions } from 'react-native'
-import tabBarIcon from '../services/tabBarIcon'
-import { Container,Thumbnail, List, ListItem, Body,Left, Right,Text,Icon,Grid,Row,Col,Separator,Content  } from 'native-base';
-import {CalendarList } from 'react-native-calendars'
+import tabBarIcon from '../../services/tabBarIcon'
+import { 
+  Container,
+  Tab,
+  ScrollableTab,
+  Tabs  } from 'native-base';
 import moment from 'moment'
 import {connect} from 'react-redux'
-import {fetchCabanas} from '../redux/actions/cabanas'
-import {SERVER, ENDPOINTS} from '../constants'
-import {enumerateDaysBetweenDates} from '../services/dateServices'
-import {httpGet} from '../services/servicesHttp'
+import {fetchCabanas} from '../../redux/actions/cabanas'
+import {ENDPOINTS} from '../../constants'
+import {enumerateDaysBetweenDates} from '../../services/dateServices'
+import {httpGet} from '../../services/servicesHttp'
 import _ from 'lodash'
+import AllCabanas from "./components/AllCabanas";
+import MultiCalendar from "./components/MultiCalendar";
 
-const {height : heightScreen} = Dimensions.get("window")
+// const {height : heightScreen} = Dimensions.get("window")
 
 async function getReservasFromCabanas(cabanaId,reservasRef){
   return await new Promise(resolve=>{
@@ -30,6 +35,7 @@ export class HomeScreen extends Component {
     tabBarIcon: tabBarIcon('apps')
   };
   state = {
+    tab : 0,
     isReady : false,
     allReservas : [],
     colors : {alerces : "#bf360c",arrayanes : "#005662",casona : "#00c853"}
@@ -105,71 +111,54 @@ export class HomeScreen extends Component {
     })
     return obj;
   }
-  
+  onChangeTab = ({from,i})=>{
+    this.setState({tab : i})
+  }
   render() {
-    const {isReady,allReservas,colors} = this.state;
+    const {tab,isReady,allReservas,colors} = this.state;
     const {cabanas} = this.props;
+    let tabs = [];
+    if(isReady){
+      tabs.push(
+      <Tab
+      activeTabStyle={{backgroundColor : '#1c313a'}}
+      activeTextStyle={{color : 'white'}}
+      tabStyle={{backgroundColor : 'white'}} 
+      textStyle={{color : "black"}}
+      key={"todas"} 
+      heading="TODAS">
+        <AllCabanas allReservas={allReservas} cabanas={cabanas} colors={colors} />
+      </Tab>)
+      tabs.push(...cabanas.map(cabana=>{
+        const {Id} = cabana;
+        return (
+        <Tab 
+        activeTabStyle={{backgroundColor : '#1c313a'}}
+        activeTextStyle={{color : 'white'}}
+        tabStyle={{backgroundColor : 'white'}} 
+        textStyle={{color : "black"}}  
+        key={Id} 
+        heading={cabana.Id.toUpperCase()}>
+            {Id === "alerces" && <MultiCalendar />}
+            {Id === "arrayanes" && <MultiCalendar />}
+            {Id === "casona" && <MultiCalendar />}
+        </Tab>
+      )}))
+    }
     return (
       <Container style={styles.root}>
-        {isReady ?
-          <Content>
-              <CalendarList
-              onDayPress={(day)=>alert(JSON.stringify(day))}
-              horizontal
-              pastScrollRange={0}
-              futureScrollRange={50}
-              style={{flex : 1}}
-              calendarHeight={390}
-              minDate={moment(moment.now()).format("YYYY-MM-DD")}
-              pagingEnabled
-              markingType='multi-period'
-              showScrollIndicator
-              firstDay={1}
-              markedDates={{
-                ...allReservas
-              }}
-              />
-            <Separator style={{maxHeight : 1}} />
-              <Grid>
-                <Row>
-                  {_.chunk(cabanas,2).map((item,i)=>(
-                  <Col style={{}} key={i}>
-                    <List>
-                      {item.map(cabana=>(
-                        <ListItem 
-                          button 
-                          avatar
-                          noBorder
-                          key={cabana.Id} 
-                          onPress={()=>this.props.navigation.navigate("CabanaReservasScreen",cabana)}
-                          style={styles.listItem}
-                          >
-                          <Left style={{position : 'relative'}}>
-                            <Thumbnail 
-                            style={{width : 30,height : 30,position : 'absolute',top : 6}} 
-                            source={{uri: `${SERVER.server}/${cabana.Main}`}} />
-                          </Left>
-                          <Body>
-                            <Text style={{fontSize : 10,marginLeft : 18}}>{cabana.Nombre}</Text>
-                          </Body>
-                          <Right style={{justifyContent : 'center'}}>
-                            <Icon name="invert-colors" type="MaterialIcons" 
-                            style={{color : colors[cabana.Id],fontSize : 15}}/>
-                          </Right>
-                        </ListItem>
-                      ))}
-                    </List> 
-                  </Col>
-                  ))}
-                </Row>
-              </Grid>
-          </Content>
-        : (
+       {isReady ? (
+       <Tabs 
+       onChangeTab={this.onChangeTab}
+       locked
+       tabBarUnderlineStyle={{backgroundColor : 'gray'}}
+       renderTabBar={()=> <ScrollableTab />}>
+        {tabs}
+       </Tabs> ) : (
         <View style={styles.loading}>
           <ActivityIndicator size="large" />
         </View>
-        ) 
-        }
+        )}
       </Container>
     )
   }
@@ -180,7 +169,7 @@ const styles = StyleSheet.create({
     flex : 1
   },
   loading : {
-    minHeight : heightScreen - heightScreen * 0.20,
+    flex: 1,
     justifyContent : 'center',
     alignItems : 'center'
   },
@@ -195,3 +184,5 @@ const mapDispatchToProps = dispatch => ({
   fetchCabanas : ()=>dispatch(fetchCabanas())
 })
 export default connect(mapStateToProps,mapDispatchToProps)(HomeScreen)
+
+  
