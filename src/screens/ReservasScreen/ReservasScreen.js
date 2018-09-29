@@ -6,7 +6,6 @@ import _ from 'lodash'
 import {connect} from 'react-redux'
 import {fetchReservasAdmin,limpiarReservasAnuladas,cambioEstadoReserva} from '../../redux/actions/reservas'
 import ReservaListItem from './components/ReservaListItem'
-import ReservaDetail from './components/ReservaDetail'
 import ReservaToolbar from './components/ReservaToolbar'
 
 class ReservasScreen extends Component {

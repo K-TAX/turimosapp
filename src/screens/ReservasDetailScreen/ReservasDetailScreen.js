@@ -1,24 +1,39 @@
-import React, { Component } from 'react'
-import {View,StyleSheet,ScrollView,TouchableOpacity } from 'react-native'
+import React, { Component,Fragment } from 'react'
+import {View,StyleSheet,ActivityIndicator,TouchableOpacity } from 'react-native'
 import {Container,Text,Thumbnail,Icon,Row,Col,Grid,Item,Input,Button,Label,Content} from 'native-base'
 import {Title,Appbar,Chip,Button as ButtonPaper } from 'react-native-paper'
 import moment from 'moment'
 import {connect} from 'react-redux'
 import _ from 'lodash'
-import {SERVER} from '../../constants'
-import Expo from 'expo';
+import {ENDPOINTS,SERVER} from '../../constants'
+import {httpGet} from '../../services/servicesHttp'
 import {enumerateDaysBetweenDates} from '../../services/dateServices'
 import {numberToClp} from 'chilean-formatter'
 import { Dialog, Portal } from 'react-native-paper';
+import {utcToLocalDateString} from '../../services/dateServices'
 
 export class ReservasDetailScreen extends Component {
   static navigationOptions = {
     title : "Detalles Reserva"
   }
   state = {
+    abonos : [],
     dialogOpen : false,
     abonoMontoInput : '',
-    montoAbonado : 0
+    montoAbonado : 0,
+    isReadyAbonos : false
+  }
+  componentDidMount(){
+    this.fetchAbonos()
+  }
+  fetchAbonos = ()=>{
+    const {params : reserva} = this.props.navigation.state;
+    httpGet(ENDPOINTS.abonos,reserva.Id,this.props.accessToken).then(({data,status})=>{
+      if(status === 200){
+        let montoAbonado = data.length ? data.map(x=>x.Monto).reduce((a,b)=>parseInt(a,10)+parseInt(b,10)) : 0;
+        this.setState({isReadyAbonos : true,abonos : data,montoAbonado});
+      }
+    })
   }
   onDialogClose = ()=>{
     this.setState({dialogOpen : false,abonoMontoInput : ''})
@@ -29,7 +44,7 @@ export class ReservasDetailScreen extends Component {
   }
   render() {
     const {params : details} = this.props.navigation.state;
-    const {abonoMontoInput,montoAbonado} = this.state;
+    const {abonoMontoInput,montoAbonado,abonos,isReadyAbonos} = this.state;
     const chipBackgroundColor = details.Estado == 0?"#e0e0e0":details.Estado == 1?"#00C853":details.Estado==2?"#EF5350":"#e0e0e0";
     const chipColor = details.Estado == 0?"#000":details.Estado == 1?"#fff":details.Estado==2?"#fff":"#000";
     const cabana = _.find(this.props.cabanas,c=>c.Id === details.Cabana);
@@ -58,7 +73,7 @@ export class ReservasDetailScreen extends Component {
               <Title style={{marginLeft : 15,marginBottom : 10}}>{cabana.Nombre}</Title>
             </View>
             <Text style={{position : 'absolute',bottom : 5,right : 0}} note>
-            {moment(details["Registro"]).format("lll")}</Text>
+            {moment(utcToLocalDateString(details["Registro"])).format("lll")}</Text>
           </View>
         </Appbar>
         <Content padder>
@@ -66,7 +81,7 @@ export class ReservasDetailScreen extends Component {
             <Row style={{ height: 35,position : 'relative' }}>
               <View style={{flexDirection : 'row',alignItems : 'center'}}>
                 <Icon name="person" type="MaterialIcons" />
-                <Title style={{marginLeft : 15}}>{details.Cliente.toUpperCase()}</Title>
+                <Title style={{marginLeft : 15,fontSize : 18}}>{details.Cliente.toUpperCase()}</Title>
               </View>
               <Chip 
               style={{backgroundColor : chipBackgroundColor,
@@ -145,22 +160,35 @@ export class ReservasDetailScreen extends Component {
                   <Text style={{fontSize : 12}}>30%</Text>
                 </Row>
               </Col>
-              <Col style={{alignItems : 'center'}}>
-                <Row>
-                  <Text style={{fontWeight : 'bold'}}>{numberToClp(montoAbonado)}</Text>
-                </Row>
-                <Row>
-                  <Text style={{fontSize : 12}}>Monto Abonado</Text>
-                </Row>
+              <Col style={{alignItems : 'center',justifyContent : 'center'}}>
+              {isReadyAbonos ?
+                <Fragment>
+                  <Row>
+                    <Text style={{fontWeight : 'bold'}}>
+                      {numberToClp(montoAbonado)}
+                    </Text>
+                  </Row>
+                  <Row>
+                    <Text style={{fontSize : 12}}>Monto Abonado</Text>
+                  </Row>
+                </Fragment> : <ActivityIndicator size="small" /> }
               </Col>
-              <TouchableOpacity style={{flex : 1}}>
-                <Col style={{alignItems : 'center'}}>
-                  <Row>
-                    <Text style={{fontWeight : 'bold',color : 'blue' }}>0</Text>
-                  </Row>
-                  <Row>
-                    <Text style={{fontSize : 12,color : 'blue'}}>Cantidad Abonos</Text>
-                  </Row>
+              <TouchableOpacity 
+              disabled={!(abonos.length)}
+              onPress={()=>this.props.navigation.navigate("AbonosScreen",abonos)}
+              style={{flex : 1}}>
+                <Col style={{alignItems : 'center',justifyContent : 'center'}}>
+                  {isReadyAbonos ?
+                  <Fragment>
+                    <Row>
+                      <Text style={{fontWeight : 'bold',color : abonos.length ? 'blue' : "gray" }}>
+                        {abonos.length}
+                      </Text>
+                    </Row>
+                    <Row>
+                      <Text style={{fontSize : 12,color : abonos.length ? 'blue' : "gray"}}>Cantidad Abonos</Text>
+                    </Row>
+                  </Fragment> : <ActivityIndicator size="small" /> }
                 </Col>
               </TouchableOpacity>
             </Row>
@@ -223,7 +251,9 @@ export class ReservasDetailScreen extends Component {
                     <Input 
                     renderToHardwareTextureAndroid
                     keyboardType="numeric"
-                    onChangeText={abonoMontoInput=>this.setState({abonoMontoInput})}
+                    onChangeText={val=>
+                      this.setState({abonoMontoInput:  /^[0-9]*$/.test(val) ? val : val.slice(0,val.length - 1)})
+                    }
                     value={abonoMontoInput} />
                   </Item>
                 </Dialog.Content>
@@ -231,7 +261,12 @@ export class ReservasDetailScreen extends Component {
                   <Button style={{marginEnd : 15,maxWidth : 120}} light onPress={this.onDialogClose}>
                     <Text>Cancelar</Text>
                   </Button>
-                  <Button primary style={{maxWidth : 120}} onPress={this.abonarMonto}>
+                  <Button 
+                  disabled={!(abonoMontoInput) || inputAbonoIsError} 
+                  primary={!!(abonoMontoInput)} 
+                  light={!(abonoMontoInput) || inputAbonoIsError} 
+                  style={{maxWidth : 120}} 
+                  onPress={this.abonarMonto}>
                     <Text>Confirmar</Text>
                   </Button>
                 </Dialog.Actions>
@@ -249,21 +284,11 @@ const styles = StyleSheet.create({
     flex : 1
   },
   appbar : {
-    minHeight : 75,
+    minHeight : 75, 
     position : 'relative',
     width : '100%',
     backgroundColor : 'white',
     paddingHorizontal : 15
-  },
-  content : {
-    flex : 1
-  },
-  first : {
-    flex : 1,
-    padding : 15
-  },
-  second : {
-    flex : 1
   },
   top : {
     padding : 10,
@@ -275,19 +300,11 @@ const styles = StyleSheet.create({
   topTitle : {
     flexDirection : 'row',
     alignItems : 'center'
-  },
-  table : {
-    backgroundColor : 'teal'
-  },
-  tableText : {
-    color : 'white',
-    textAlign : 'center',
-    fontWeight : 'bold',
-    fontSize : 14
   }
 })
 
 const mapStateToProps = state => ({
-  cabanas : state.cabanas.cabanas
+  cabanas : state.cabanas.cabanas,
+  accessToken : state.auth.accessToken
 })
 export default connect(mapStateToProps)(ReservasDetailScreen)

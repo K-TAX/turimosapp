@@ -10,3 +10,7 @@ export const enumerateDaysBetweenDates = (startDate, endDate)=> {
     }
     return dates;
 };
+
+export function utcToLocalDateString(utcDate){
+    return moment(moment.utc(utcDate).toDate()).format('YYYY-MM-DD HH:mm:ss').toString()
+}

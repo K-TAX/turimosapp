@@ -3,6 +3,7 @@ import { View } from 'react-native'
 import { ListItem,Text,Left,Body,Right,Icon} from 'native-base';
 import { Checkbox,Chip } from 'react-native-paper';
 import moment from 'moment'
+import {utcToLocalDateString} from '../../../services/dateServices'
 
 class ReservaListItem extends PureComponent{
     render(){
@@ -27,7 +28,7 @@ class ReservaListItem extends PureComponent{
           </View>
         </Body>
         <Right style={{position : 'relative'}}>
-          <Text note>{moment(item.Registro).format("lll")}</Text>
+          <Text note>{moment(utcToLocalDateString(item.Registro)).format("lll")}</Text>
           <Chip 
             style={{backgroundColor : chipBackgroundColor,
             height : 25,

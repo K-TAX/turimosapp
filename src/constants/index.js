@@ -15,7 +15,8 @@ export const ENDPOINTS = {
     add_video : "add_video",  
     add_precio : "add_precio",  
     define_main_cabana : "define_main_cabana",
-    gallery_upload : 'gallery_upload',  
+    gallery_upload : 'gallery_upload',
+    add_abono : "abonos/add",  
     //delete
     delete_detail : "delete_detail/",  
     delete_tag : "delete_tag/",  
@@ -27,6 +28,7 @@ export const ENDPOINTS = {
     reservas_admin : "reservas_admin",
     reservas_reservadas : "reservas_reservadas/",
     cabanas : "cabanas",
+    abonos : "abonos/",
     all_gallery : "all_gallery",
     all_gallery3d : "all_gallery3d",
     all_tags : "all_tags",

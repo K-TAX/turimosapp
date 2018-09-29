@@ -29,6 +29,7 @@ import CabanaReservasScreen from './src/screens/CabanaReservasScreen';
 import HomeScreen from './src/screens/HomeScreen';
 import ReservasScreen from './src/screens/ReservasScreen';
 import ReservasDetailScreen from './src/screens/ReservasDetailScreen';
+import AbonosScreen from './src/screens/AbonosScreen';
 import 'moment/locale/es';
 
 moment.locale('es');
@@ -94,6 +95,9 @@ const AppStackNavigator = createStackNavigator({
   },
   ReservasDetailScreen : {
     screen : ReservasDetailScreen
+  },
+  AbonosScreen : {
+    screen : AbonosScreen
   }
 },{
   mode : "modal",
