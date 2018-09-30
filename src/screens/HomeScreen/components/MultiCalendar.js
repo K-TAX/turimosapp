@@ -5,7 +5,7 @@ export class MultiCalendar extends Component {
   render() {
     return (
       <View>
-        <Text> MultiCalendar </Text>
+        <Text> Proximamente </Text>
       </View>
     )
   }

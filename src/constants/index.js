@@ -24,6 +24,7 @@ export const ENDPOINTS = {
     delete_video : "delete_video/",  
     delete_precio : "delete_precio/",  
     clean_all_anuladas : "clean_all_anuladas",  
+    delete_abono : "delete_abono/",  
     //get
     reservas_admin : "reservas_admin",
     reservas_reservadas : "reservas_reservadas/",

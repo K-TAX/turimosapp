@@ -80,7 +80,7 @@ class ReservasScreen extends Component {
   }
   render() {
     const {reservas_admin} = this.props;
-    const {selected,isReady,isOpenModal,filter,details} = this.state;
+    const {selected,isReady,filter} = this.state;
     return (
     <Container 
       style={styles.root}>

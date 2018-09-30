@@ -1,50 +1,46 @@
 import React, { Component,Fragment } from 'react'
 import {View,StyleSheet,ActivityIndicator,TouchableOpacity } from 'react-native'
-import {Container,Text,Thumbnail,Icon,Row,Col,Grid,Item,Input,Button,Label,Content} from 'native-base'
+import {Container,Text,Thumbnail,Icon,Row,Col,Grid,Content} from 'native-base'
 import {Title,Appbar,Chip,Button as ButtonPaper } from 'react-native-paper'
 import moment from 'moment'
 import {connect} from 'react-redux'
 import _ from 'lodash'
-import {ENDPOINTS,SERVER} from '../../constants'
-import {httpGet} from '../../services/servicesHttp'
+import {SERVER} from '../../constants'
+import {fetchAbonos,addAbono} from '../../redux/actions/abonos'
 import {enumerateDaysBetweenDates} from '../../services/dateServices'
 import {numberToClp} from 'chilean-formatter'
-import { Dialog, Portal } from 'react-native-paper';
+import { Portal } from 'react-native-paper';
 import {utcToLocalDateString} from '../../services/dateServices'
+import DialogAddAbonos from './components/DialogAddAbonos'
 
 export class ReservasDetailScreen extends Component {
   static navigationOptions = {
     title : "Detalles Reserva"
   }
   state = {
-    abonos : [],
     dialogOpen : false,
-    abonoMontoInput : '',
-    montoAbonado : 0,
     isReadyAbonos : false
   }
-  componentDidMount(){
-    this.fetchAbonos()
-  }
-  fetchAbonos = ()=>{
+  async componentDidMount(){
     const {params : reserva} = this.props.navigation.state;
-    httpGet(ENDPOINTS.abonos,reserva.Id,this.props.accessToken).then(({data,status})=>{
-      if(status === 200){
-        let montoAbonado = data.length ? data.map(x=>x.Monto).reduce((a,b)=>parseInt(a,10)+parseInt(b,10)) : 0;
-        this.setState({isReadyAbonos : true,abonos : data,montoAbonado});
-      }
-    })
+    await this.props.fetchAbonos(reserva.Id);
+    this.setState({isReadyAbonos : true})
   }
+
   onDialogClose = ()=>{
     this.setState({dialogOpen : false,abonoMontoInput : ''})
   }
-  abonarMonto = () => {
-    const {abonoMontoInput,montoAbonado} = this.state;
-    this.setState({montoAbonado : parseInt(abonoMontoInput) + montoAbonado,abonoMontoInput : '',dialogOpen : false})
+  abonarMonto = async (monto) => {
+    const {params : reserva} = this.props.navigation.state;
+    await this.props.addAbono(monto,reserva.Id)
+    this.setState({dialogOpen : false})
   }
   render() {
+    const {abonos : abonosObj} = this.props;
     const {params : details} = this.props.navigation.state;
-    const {abonoMontoInput,montoAbonado,abonos,isReadyAbonos} = this.state;
+    const abonos = abonosObj[details.Id] ? abonosObj[details.Id].data : []
+    const montoAbonado = abonosObj[details.Id] ? abonosObj[details.Id].montoAbonado : 0;
+    const {isReadyAbonos,dialogOpen} = this.state;
     const chipBackgroundColor = details.Estado == 0?"#e0e0e0":details.Estado == 1?"#00C853":details.Estado==2?"#EF5350":"#e0e0e0";
     const chipColor = details.Estado == 0?"#000":details.Estado == 1?"#fff":details.Estado==2?"#fff":"#000";
     const cabana = _.find(this.props.cabanas,c=>c.Id === details.Cabana);
@@ -57,12 +53,6 @@ export class ReservasDetailScreen extends Component {
       days = 2;
     }else{
       days = daysBetween.length + 2;
-    }
-    let inputAbonoIsError = (parseInt(abonoMontoInput)+ parseInt(montoAbonado ? montoAbonado : 0)) > parseInt(cabana.Precio) * days;
-    let inputAbonoIsSuccess = !inputAbonoIsError;
-    if(!abonoMontoInput){
-      inputAbonoIsError = false;
-      inputAbonoIsSuccess = false;
     }
     return (
       <Container style={styles.root}>
@@ -175,7 +165,7 @@ export class ReservasDetailScreen extends Component {
               </Col>
               <TouchableOpacity 
               disabled={!(abonos.length)}
-              onPress={()=>this.props.navigation.navigate("AbonosScreen",abonos)}
+              onPress={()=>this.props.navigation.navigate("AbonosScreen",details.Id)}
               style={{flex : 1}}>
                 <Col style={{alignItems : 'center',justifyContent : 'center'}}>
                   {isReadyAbonos ?
@@ -196,13 +186,14 @@ export class ReservasDetailScreen extends Component {
             <Row style={{padding : 10}}>
               <View style={{width : '100%'}}>
                 <ButtonPaper 
-                icon="add"
+                icon={montoAbonado.toString() === (cabana.Precio * days).toString() ? "check" : "add"}
                 mode="outline"
                 color="blue"
-                disabled={montoAbonado === cabana.Precio * days} 
+                disabled={montoAbonado.toString() === (cabana.Precio * days).toString()} 
                 onPress={()=>this.setState({dialogOpen : true})} 
                 style={{alignSelf : 'center',marginVertical : 10}}>
-                  Agregar Abono
+                  {montoAbonado.toString() === (cabana.Precio * days).toString() ?
+                   "Pagado Completamente" : "Agregar Abono"}
                 </ButtonPaper>
                 <View style={{width : '100%',flexDirection : 'row',justifyContent : 'space-around',marginTop : 25}}>
                   <ButtonPaper 
@@ -222,55 +213,14 @@ export class ReservasDetailScreen extends Component {
               </View>
             </Row>
             <Portal>
-              <Dialog
-                visible={this.state.dialogOpen}
-                onDismiss={this.onDialogClose}>
-                <Dialog.Title>
-                  Agregar Abono
-                </Dialog.Title>
-                <Dialog.Content style={{position : 'relative'}}>
-                  <View style={{flexDirection : 'row',justifyContent : 'flex-end'}}>
-                    <Button 
-                    onPress={()=>this.setState({abonoMontoInput : (parseInt(cabana.Precio * 0.30) * days).toString()})}
-                    style={{marginRight : 10}}
-                    light 
-                    rounded>
-                      <Text>30%</Text>
-                    </Button>
-                    <Button 
-                    onPress={()=>this.setState({
-                        abonoMontoInput : ((parseInt(cabana.Precio) * days) - montoAbonado).toString()}
-                        )}
-                    light 
-                    rounded>
-                      <Text>100%</Text>
-                    </Button>
-                  </View>
-                  <Item stackedLabel success={inputAbonoIsSuccess} error={inputAbonoIsError} >
-                    <Label>Monto</Label>
-                    <Input 
-                    renderToHardwareTextureAndroid
-                    keyboardType="numeric"
-                    onChangeText={val=>
-                      this.setState({abonoMontoInput:  /^[0-9]*$/.test(val) ? val : val.slice(0,val.length - 1)})
-                    }
-                    value={abonoMontoInput} />
-                  </Item>
-                </Dialog.Content>
-                <Dialog.Actions style={{padding : 10}}>
-                  <Button style={{marginEnd : 15,maxWidth : 120}} light onPress={this.onDialogClose}>
-                    <Text>Cancelar</Text>
-                  </Button>
-                  <Button 
-                  disabled={!(abonoMontoInput) || inputAbonoIsError} 
-                  primary={!!(abonoMontoInput)} 
-                  light={!(abonoMontoInput) || inputAbonoIsError} 
-                  style={{maxWidth : 120}} 
-                  onPress={this.abonarMonto}>
-                    <Text>Confirmar</Text>
-                  </Button>
-                </Dialog.Actions>
-              </Dialog>
+              <DialogAddAbonos 
+              abonarMonto={this.abonarMonto}
+              dialogOpen={dialogOpen}
+              onDialogClose={this.onDialogClose}
+              cabana={cabana}
+              days={days}
+              montoAbonado={montoAbonado}
+              />
             </Portal>
         </Content>
       </Container>
@@ -305,6 +255,11 @@ const styles = StyleSheet.create({
 
 const mapStateToProps = state => ({
   cabanas : state.cabanas.cabanas,
-  accessToken : state.auth.accessToken
+  accessToken : state.auth.accessToken,
+  abonos : state.abonos.abonos
 })
-export default connect(mapStateToProps)(ReservasDetailScreen)
+const mapDispatchToProps = dispatch => ({
+  fetchAbonos : (reservaId)=>dispatch(fetchAbonos(reservaId)),
+  addAbono : (monto,reservaId)=>dispatch(addAbono(monto,reservaId))
+})
+export default connect(mapStateToProps,mapDispatchToProps)(ReservasDetailScreen)

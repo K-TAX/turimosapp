@@ -1,12 +1,12 @@
 import React, { Component } from 'react'
-import { StyleSheet,View,ActivityIndicator,FlatList} from 'react-native'
+import { StyleSheet,View,ActivityIndicator,FlatList,Alert} from 'react-native'
 import { Container,Toast } from 'native-base';
 import _ from 'lodash'
+import {NavigationActions} from 'react-navigation'
 import {connect} from 'react-redux'
 import AbonosListItem from './components/AbonosListItem'
-import AbonosToolbar from './components/AbonosToolbar'
-import {ENDPOINTS} from '../../constants'
-import {httpGet} from '../../services/servicesHttp'
+import {deleteAbono} from '../../redux/actions/abonos'
+
 class AbonosScreen extends Component {
   static navigationOptions = {
     title : "Abonos"
@@ -21,7 +21,22 @@ class AbonosScreen extends Component {
   }
 
   handleDeleteAbono = (abonoId)=>{
-    alert(abonoId)
+    const {params : reservaId} = this.props.navigation.state;
+    Alert.alert(
+      'Eliminar Abono',
+      '¿Desea eliminar el abono seleccionado?',
+      [
+        {text: 'Cancelar', style: 'cancel'},
+        {text: 'Sí',color : 'red', onPress: async () => {
+            await this.props.deleteAbono(abonoId,reservaId);
+            if(this.props.abonos[reservaId].data.length === 0){
+              this.props.navigation.dispatch(NavigationActions.back())
+            }
+          }
+        },
+      ],
+      { cancelable: true }
+    )
   }
   _renderItem = ({item,index})=>{
     return (
@@ -33,7 +48,8 @@ class AbonosScreen extends Component {
   }
   render() {
     const {isReady} = this.state;
-    const {params : abonos} = this.props.navigation.state;
+    const {params : reservaId} = this.props.navigation.state;
+    const abonos = this.props.abonos[reservaId].data;
     return (
     <Container 
       style={styles.root}>
@@ -71,8 +87,12 @@ const styles = StyleSheet.create({
 })
 
 const mapStateToProps = state => ({
-  accessToken : state.auth.accessToken
+  accessToken : state.auth.accessToken,
+  abonos : state.abonos.abonos
+})
+const mapDispatchToProps = dispatch => ({
+  deleteAbono : (abonoId,reservaId)=>dispatch(deleteAbono(abonoId,reservaId))
 })
 
-export default connect(mapStateToProps)(AbonosScreen)
+export default connect(mapStateToProps,mapDispatchToProps)(AbonosScreen)
 
