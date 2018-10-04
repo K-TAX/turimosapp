@@ -7,8 +7,44 @@ import _ from 'lodash'
 import {SERVER} from '../../../constants'
 
 export class MultiCalendar extends Component {
+  state = {
+    allReservas : {},
+    firstSelected : '',
+    secondSelected : '',
+  }
+  componentDidMount(){
+    const {allReservas} = this.props;
+    this.setState({allReservas})
+  }
+  onDayPress = async (day)=>{
+    const {allReservas,firstSelected,secondSelected} = this.state;
+    if(typeof allReservas[day.dateString] !== "object"){
+      allReservas[day.dateString] = {selected : false};
+    }
+    if(firstSelected && !secondSelected){
+      this.setState({secondSelected : day.dateString})
+      allReservas[day.dateString] = {...allReservas[day.dateString],selected : true}
+      await new Promise(resolve=>{
+        setTimeout(()=>{
+          allReservas[firstSelected] = {...allReservas[firstSelected],selected : false}
+          allReservas[day.dateString] = {...allReservas[secondSelected],selected : false}
+          this.setState({firstSelected : '',secondSelected : ''})
+          resolve()
+        },100)
+      })
+      this.props.navigation.navigate("NewReservaScreen",{dateRange : [firstSelected,day.dateString]})
+    }else{
+      this.setState({firstSelected : day.dateString});
+      allReservas[day.dateString] = {...allReservas[day.dateString],selected : true}
+    }
+    this.setState({allReservas : {...allReservas}})
+  }
+  resetRangeDates = ()=>{
+    this.setState({firstSelected : false,secondSelected : false})
+  }
   render() {
-    const {allReservas,cabanas,colors} = this.props;
+    const {cabanas,colors} = this.props;
+    const {allReservas} = this.state;
     return (
     <Container>
        <Grid style={{maxHeight : 40}}>
@@ -30,7 +66,7 @@ export class MultiCalendar extends Component {
       </Grid>
       <Content>
         <CalendarList
-        onDayPress={(day)=>alert(JSON.stringify(day))}
+        onDayPress={this.onDayPress}
         horizontal
         pastScrollRange={0}
         futureScrollRange={50}

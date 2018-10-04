@@ -7,6 +7,9 @@
     "androidStatusBar": {
       "backgroundColor": "#000000"
     },
+    "splash": {
+      "image": "./assets/splash.png"
+    },
     "ios": {
       "bundleIdentifier": "com.groupbi.turismapp"
     },

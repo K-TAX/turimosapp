@@ -25,7 +25,7 @@ import moment from 'moment'
 import {createMaterialBottomTabNavigator} from 'react-navigation-material-bottom-tabs'
 import AuthLoadingScreen from './src/screens/AuthLoadingScreen';
 import SignInScreen from './src/screens/SignInScreen';
-import CabanaReservasScreen from './src/screens/CabanaReservasScreen';
+import NewReservaScreen from './src/screens/NewReservaScreen';
 import HomeScreen from './src/screens/HomeScreen';
 import ReservasScreen from './src/screens/ReservasScreen';
 import ReservasDetailScreen from './src/screens/ReservasDetailScreen';
@@ -90,8 +90,8 @@ const AppStackNavigator = createStackNavigator({
       )
     })
   },
-  CabanaReservasScreen : {
-    screen : CabanaReservasScreen
+  NewReservaScreen : {
+    screen : NewReservaScreen
   },
   ReservasDetailScreen : {
     screen : ReservasDetailScreen

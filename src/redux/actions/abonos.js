@@ -1,6 +1,7 @@
 import {httpGet, httpPost,httpDelete} from '../../services/servicesHttp'
 import {ENDPOINTS} from '../../constants'
 import storeConfig from '../../redux/storeConfig'
+import _ from 'lodash'
 import {Toast} from 'native-base'
 
 export const fetchAbonos = (reservaId)=>{
@@ -85,6 +86,59 @@ export const deleteAbono = (abonoId,reservaId)=>{
                 }
                 resolve()
             })
+        })
+    }
+}
+export const addTempAbono = (abonoMonto)=>{
+    const state = storeConfig.store.getState();
+    return async (dispatch) => {
+        let abonos = state.abonos.tempAbonos.abonos;
+        await new Promise(resolve=>{
+            abonos = [...abonos,abonoMonto];
+            let montoAbonado = abonos.length ? abonos.reduce((a,b)=>parseInt(a,10)+parseInt(b,10)) : 0;
+            dispatch({
+                type : "ADD_TEMP_ABONO",
+                payload : {
+                    tempAbonos  : {
+                        abonos,
+                        montoAbonado 
+                    }
+                }
+            })
+            resolve()
+            Toast.show({
+                type : "success",
+                text : "Abono Agregado Exitosamente.",
+                position : "top",
+                duration : 2000
+            })
+        })
+    }
+}
+export const deleteTempAbono = (abonoIndex)=>{
+    const state = storeConfig.store.getState();
+    return async (dispatch) => {
+        let abonos = state.abonos.tempAbonos.abonos;
+        await new Promise(resolve=>{
+            abonos = [...abonos.slice(0,abonoIndex),...abonos.slice(abonoIndex + 1,abonos.length)];
+            let montoAbonado = abonos.length ? abonos.reduce((a,b)=>parseInt(a,10)+parseInt(b,10)) : 0;
+            dispatch({
+                type : "DELETE_TEMP_ABONO",
+                payload : {
+                    tempAbonos  : {
+                        abonos,
+                        montoAbonado 
+                    }
+                }
+            })
+            resolve();
+        })
+    }
+}
+export const cleanTempAbonos = ()=>{
+    return dispatch => {
+        dispatch({
+            type : "CLEAN_TEMP_ABONOS"
         })
     }
 }

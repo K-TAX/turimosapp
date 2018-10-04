@@ -51,14 +51,9 @@ export class HomeScreen extends Component {
       })
       await Promise.all(promises)
       this.setState({allReservas : this.mapReservas(reservasRef.reservas)},()=>{
-        setTimeout(()=>{
-          this.setState({isReady : true});
-        },1000)
+        this.setState({isReady : true});
       })
     }
-    setTimeout(()=>{
-      this.props.navigation.navigate("ModalScreen")
-    },2000)
   }
   mapReservas = (allReservas)=>{
     const obj = {};
@@ -105,7 +100,11 @@ export class HomeScreen extends Component {
               { color: 'transparent' }
             ]
           }
-          obj[strDate].periods[index] = {startingDay: false,endingDay: false,color: colors[reserva.Cabana]}
+          obj[strDate].periods[index] = {
+            startingDay: false,
+            endingDay: false,
+            color: colors[reserva.Cabana]
+          }
         })
       }
     })
@@ -115,46 +114,16 @@ export class HomeScreen extends Component {
     this.setState({tab : i})
   }
   render() {
-    const {tab,isReady,allReservas,colors} = this.state;
+    const {isReady,allReservas,colors} = this.state;
     const {cabanas} = this.props;
-    let tabs = [];
-    if(isReady){
-      tabs.push(
-      <Tab
-      activeTabStyle={{backgroundColor : '#1c313a'}}
-      activeTextStyle={{color : 'white'}}
-      tabStyle={{backgroundColor : 'white'}} 
-      textStyle={{color : "black"}}
-      key={"todas"} 
-      heading="TODAS">
-        <AllCabanas allReservas={allReservas} cabanas={cabanas} colors={colors} />
-      </Tab>)
-      tabs.push(...cabanas.map(cabana=>{
-        const {Id} = cabana;
-        return (
-        <Tab 
-        activeTabStyle={{backgroundColor : '#1c313a'}}
-        activeTextStyle={{color : 'white'}}
-        tabStyle={{backgroundColor : 'white'}} 
-        textStyle={{color : "black"}}  
-        key={Id} 
-        heading={cabana.Id.toUpperCase()}>
-            {Id === "alerces" && <MultiCalendar />}
-            {Id === "arrayanes" && <MultiCalendar />}
-            {Id === "casona" && <MultiCalendar />}
-        </Tab>
-      )}))
-    }
     return (
       <Container style={styles.root}>
        {isReady ? (
-       <Tabs 
-       onChangeTab={this.onChangeTab}
-       locked
-       tabBarUnderlineStyle={{backgroundColor : 'gray'}}
-       renderTabBar={()=> <ScrollableTab />}>
-        {tabs}
-       </Tabs> ) : (
+        <AllCabanas 
+        navigation={this.props.navigation}
+        allReservas={allReservas}
+        cabanas={cabanas}
+        colors={colors} />) : (
         <View style={styles.loading}>
           <ActivityIndicator size="large" />
         </View>

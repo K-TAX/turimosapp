@@ -1,5 +1,5 @@
 import React, { Component,Fragment } from 'react'
-import {View,StyleSheet,ActivityIndicator,TouchableOpacity } from 'react-native'
+import {View,StyleSheet,ActivityIndicator,TouchableOpacity,Alert} from 'react-native'
 import {Container,Text,Thumbnail,Icon,Row,Col,Grid,Content} from 'native-base'
 import {Title,Appbar,Chip,Button as ButtonPaper } from 'react-native-paper'
 import moment from 'moment'
@@ -7,11 +7,12 @@ import {connect} from 'react-redux'
 import _ from 'lodash'
 import {SERVER} from '../../constants'
 import {fetchAbonos,addAbono} from '../../redux/actions/abonos'
+import {cambioEstadoReserva} from '../../redux/actions/reservas'
 import {enumerateDaysBetweenDates} from '../../services/dateServices'
 import {numberToClp} from 'chilean-formatter'
 import { Portal } from 'react-native-paper';
 import {utcToLocalDateString} from '../../services/dateServices'
-import DialogAddAbonos from './components/DialogAddAbonos'
+import DialogAddAbonos from '../../components/DialogAddAbonos'
 
 export class ReservasDetailScreen extends Component {
   static navigationOptions = {
@@ -19,7 +20,12 @@ export class ReservasDetailScreen extends Component {
   }
   state = {
     dialogOpen : false,
-    isReadyAbonos : false
+    isReadyAbonos : false,
+    details : {}
+  }
+  componentWillMount(){
+    const {params : details} = this.props.navigation.state;
+    this.setState({details})
   }
   async componentDidMount(){
     const {params : reserva} = this.props.navigation.state;
@@ -28,7 +34,23 @@ export class ReservasDetailScreen extends Component {
   }
 
   onDialogClose = ()=>{
-    this.setState({dialogOpen : false,abonoMontoInput : ''})
+    this.setState({dialogOpen : false})
+  }
+  handleCambioEstadoReserva = (reservaId,estado)=>{
+    Alert.alert(
+      estado === 1 ? "Reservar" : "Anular Reserva",
+      `¿Esta seguro que desea ${estado === 1 ? "reservar":"anular"}?`,
+      [
+        {text: 'Cancelar', style: 'cancel'},
+        {text: 'Sí',color : 'red', onPress: async () => {
+          await this.props.cambioEstadoReserva([reservaId],estado);
+           this.setState({
+             details : _.find(this.props.reservas_admin,x=>x.Id === reservaId)
+           })
+        }},
+      ],
+      { cancelable: true }
+    )
   }
   abonarMonto = async (monto) => {
     const {params : reserva} = this.props.navigation.state;
@@ -37,10 +59,9 @@ export class ReservasDetailScreen extends Component {
   }
   render() {
     const {abonos : abonosObj} = this.props;
-    const {params : details} = this.props.navigation.state;
+    const {isReadyAbonos,dialogOpen,details} = this.state;
     const abonos = abonosObj[details.Id] ? abonosObj[details.Id].data : []
     const montoAbonado = abonosObj[details.Id] ? abonosObj[details.Id].montoAbonado : 0;
-    const {isReadyAbonos,dialogOpen} = this.state;
     const chipBackgroundColor = details.Estado == 0?"#e0e0e0":details.Estado == 1?"#00C853":details.Estado==2?"#EF5350":"#e0e0e0";
     const chipColor = details.Estado == 0?"#000":details.Estado == 1?"#fff":details.Estado==2?"#fff":"#000";
     const cabana = _.find(this.props.cabanas,c=>c.Id === details.Cabana);
@@ -165,7 +186,7 @@ export class ReservasDetailScreen extends Component {
               </Col>
               <TouchableOpacity 
               disabled={!(abonos.length)}
-              onPress={()=>this.props.navigation.navigate("AbonosScreen",details.Id)}
+              onPress={()=>this.props.navigation.navigate("AbonosScreen",{isTemp : false,reservaId : details.Id})}
               style={{flex : 1}}>
                 <Col style={{alignItems : 'center',justifyContent : 'center'}}>
                   {isReadyAbonos ?
@@ -200,13 +221,13 @@ export class ReservasDetailScreen extends Component {
                   icon="do-not-disturb" 
                   mode="outline" 
                   color="red" 
-                  onPress={() => console.log('Pressed')}>
+                  onPress={() => this.handleCambioEstadoReserva(details.Id,2)}>
                     Anular
                   </ButtonPaper>
                   <ButtonPaper 
                   icon="date-range"
                   mode="outline" 
-                  onPress={() => console.log('Pressed')}>
+                  onPress={() => this.handleCambioEstadoReserva(details.Id,1)}>
                     Reservar
                   </ButtonPaper>
                 </View>
@@ -255,11 +276,13 @@ const styles = StyleSheet.create({
 
 const mapStateToProps = state => ({
   cabanas : state.cabanas.cabanas,
+  reservas_admin : state.reservas.reservas_admin,
   accessToken : state.auth.accessToken,
   abonos : state.abonos.abonos
 })
 const mapDispatchToProps = dispatch => ({
   fetchAbonos : (reservaId)=>dispatch(fetchAbonos(reservaId)),
-  addAbono : (monto,reservaId)=>dispatch(addAbono(monto,reservaId))
+  addAbono : (monto,reservaId)=>dispatch(addAbono(monto,reservaId)),
+  cambioEstadoReserva : (reservaId,estado)=>dispatch(cambioEstadoReserva(reservaId,estado))
 })
 export default connect(mapStateToProps,mapDispatchToProps)(ReservasDetailScreen)
