@@ -112,7 +112,7 @@ class NewReservaScreen extends Component {
       salida : moment(this.state.salida).format("YYYY-MM-DD").toString(),
       abonos : tempAbonos.abonos,
       estado : estado,
-      isCamping
+      isCamping : isCamping? isCamping : false
     }
      this.setState({
      [estado === 1 ? "buttonLoadingReservar" : "buttonLoadingPendiente"] : true
