@@ -4,7 +4,7 @@ import { Container,Toast } from 'native-base';
 import tabBarIcon from '../../services/tabBarIcon'
 import _ from 'lodash'
 import {connect} from 'react-redux'
-import {fetchReservasAdmin,limpiarReservasAnuladas,cambioEstadoReserva} from '../../redux/actions/reservas'
+import {fetchReservasAdmin,fetchReservasAdminCampings,limpiarReservasAnuladas} from '../../redux/actions/reservas'
 import ReservaListItem from './components/ReservaListItem'
 import ReservaToolbar from './components/ReservaToolbar'
 
@@ -15,46 +15,24 @@ class ReservasScreen extends Component {
     tabBarIcon: tabBarIcon('date-range')
   }
   state = {
-    selected : [],
     isReady : false,
-    filter : null
+    filter : 0
   }
   async componentDidMount(){
     await this.props.fetchReservasAdmin();
+    await this.props.fetchReservasAdminCampings();
     this.setState({isReady : true})
   }
-  handleCheckedItem = (id) => {
-    const { selected } = this.state;
-    const selectedIndex = selected.indexOf(id);
-    let newSelected = [];
-    if (selectedIndex === -1) {
-      newSelected = newSelected.concat(selected, id);
-    } else if (selectedIndex === 0) {
-      newSelected = newSelected.concat(selected.slice(1));
-    } else if (selectedIndex === selected.length - 1) {
-      newSelected = newSelected.concat(selected.slice(0, -1));
-    } else if (selectedIndex > 0) {
-      newSelected = newSelected.concat(
-        selected.slice(0, selectedIndex),
-        selected.slice(selectedIndex + 1),
-      );
-    }
-    this.setState({ selected: newSelected });
-  }
-  isSelected = id => {
-    return (this.state.selected.indexOf(id) !== -1) ? "checked" : "unchecked"
-  } 
   handlePressItem = (details)=>{
-    this.props.navigation.navigate("ReservasDetailScreen",details)
+    const {filter} = this.state;
+    let isCamping = !!(filter === 1)
+    this.props.navigation.navigate("ReservasDetailScreen",{details,isCamping })
   }
   _renderItem = ({item,index})=>{
-    const isSelected = this.isSelected(item.Id);
     return (
       <ReservaListItem 
       item={item} 
       handlePressItem={this.handlePressItem}
-      isSelected={isSelected}
-      handleCheckedItem={this.handleCheckedItem}
        />
     )
   }
@@ -63,6 +41,7 @@ class ReservasScreen extends Component {
   }
   handleUpdateReservas = async ()=>{
     await this.props.fetchReservasAdmin();
+    await this.props.fetchReservasAdminCampings();
     Toast.show({
       type : "success",
       text : "Reservas Actualizadas.",
@@ -71,16 +50,12 @@ class ReservasScreen extends Component {
     })
   }
   handleCleanReservasAnuladas = ()=>{
-     this.props.limpiarReservasAnuladas();
-  }
-  handleCambioEstadoReserva = async (estado)=>{
-    const {selected} = this.state;
-     await this.props.cambioEstadoReserva(selected,estado);
-     this.setState({selected : []})
+    let isCamping = !!(this.state.filter === 1)
+    this.props.limpiarReservasAnuladas(isCamping);
   }
   render() {
-    const {reservas_admin} = this.props;
-    const {selected,isReady,filter} = this.state;
+    const {reservas_admin,reservas_admin_campings} = this.props;
+    const {isReady,filter} = this.state;
     return (
     <Container 
       style={styles.root}>
@@ -88,17 +63,15 @@ class ReservasScreen extends Component {
       <View style={styles.container}>
         <ReservaToolbar
         filter={filter}
-        selected={selected}
         handleChangeFilter={this.handleChangeFilter}
         handleUpdateReservas={this.handleUpdateReservas}
         handleCleanReservasAnuladas={this.handleCleanReservasAnuladas}
-        handleCambioEstadoReserva={this.handleCambioEstadoReserva}
         />
         <FlatList 
-          data={filter === null ? reservas_admin : _.filter(reservas_admin,x=>x.Estado === filter.toString())}
+          data={filter === 0 ? reservas_admin : reservas_admin_campings}
           extraData={this.state}
           renderItem={this._renderItem}
-          keyExtractor={(item, index) => item.Id}
+          keyExtractor={(item, index) => item.Id.toString()}
         /> 
       </View>
       :
@@ -126,13 +99,14 @@ const styles = StyleSheet.create({
 })
 
 const mapStateToProps = state => ({
-  reservas_admin  : state.reservas.reservas_admin
+  reservas_admin  : state.reservas.reservas_admin,
+  reservas_admin_campings  : state.reservas.reservas_admin_campings
 })
 const mapDispatchToProps = dispatch => ({
   fetchReservasAdmin  :  ()=>dispatch(fetchReservasAdmin()),
-  limpiarReservasAnuladas  :  ()=>dispatch(limpiarReservasAnuladas()),
-  cambioEstadoReserva : (selected,estado)=>dispatch(cambioEstadoReserva(selected,estado))
-})
+  fetchReservasAdminCampings  :  ()=>dispatch(fetchReservasAdminCampings()),
+  limpiarReservasAnuladas  :  (isCamping)=>dispatch(limpiarReservasAnuladas(isCamping))
+ })
 
 export default connect(mapStateToProps,mapDispatchToProps)(ReservasScreen)
 

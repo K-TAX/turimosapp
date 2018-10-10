@@ -3,41 +3,37 @@ import { StyleSheet, View,ActivityIndicator } from 'react-native'
 import tabBarIcon from '../../services/tabBarIcon'
 import {Container} from 'native-base';
 import {connect} from 'react-redux'
-import {fetchCabanas} from '../../redux/actions/cabanas'
-import {fetchAndMakeReservasPeriods} from '../../redux/actions/reservas'
+import {fetchCampings} from '../../redux/actions/campings'
+import {fetchAndMakeReservasPeriodsCampings} from '../../redux/actions/reservas'
 import _ from 'lodash'
-import AllCabanas from "./components/AllCabanas";
+import AllCamping from "./components/AllCamping";
 
 
-export class HomeScreen extends Component {
+export class CampingScreen extends Component {
   static navigationOptions = {
-    title : "Cabañas",
-    tabBarColor: '#1c313a',
-    tabBarIcon: tabBarIcon('home')
+    tabBarColor: '#377c9d',
+    tabBarIcon: tabBarIcon('terrain')
   };
   state = {
     tab : 0,
     isReady : false,
-    colors : {alerces : "#bf360c",arrayanes : "#005662",casona : "#00c853"}
+    colors : {camping1 : "#bf360c",camping2 : "#005662",camping3 : "#00c853",camping4 : "#ffd600",camping5 : "#8e24aa",camping6 : "#1b5e20"}
   }
   async componentDidMount(){
-    await this.props.fetchCabanas()
-    await this.props.fetchAndMakeReservasPeriods()
+    await this.props.fetchCampings()
+    await this.props.fetchAndMakeReservasPeriodsCampings()
     this.setState({isReady : true});
-  }
-  onChangeTab = ({from,i})=>{
-    this.setState({tab : i})
   }
   render() {
     const {isReady,colors} = this.state;
-    const {cabanas,reservasPeriods} = this.props;
+    const {campings,reservasPeriodsCampings} = this.props;
     return (
       <Container style={styles.root}>
        {isReady ? (
-        <AllCabanas 
+        <AllCamping 
         navigation={this.props.navigation}
-        reservasPeriods={reservasPeriods}
-        cabanas={cabanas}
+        reservasPeriods={reservasPeriodsCampings}
+        campings={campings}
         colors={colors} />) : (
         <View style={styles.loading}>
           <ActivityIndicator size="large" />
@@ -62,13 +58,13 @@ const styles = StyleSheet.create({
   }
 })
 const mapStateToProps = state => ({
-  cabanas  : state.cabanas.cabanas,
-  reservasPeriods : state.reservas.reservasPeriods
+  campings  : state.campings.campings,
+  reservasPeriodsCampings : state.reservas.reservasPeriodsCampings
 })
 const mapDispatchToProps = dispatch => ({
-  fetchCabanas : ()=>dispatch(fetchCabanas()),
-  fetchAndMakeReservasPeriods : ()=>dispatch(fetchAndMakeReservasPeriods())
+  fetchCampings : ()=>dispatch(fetchCampings()),
+  fetchAndMakeReservasPeriodsCampings : ()=>dispatch(fetchAndMakeReservasPeriodsCampings())
 })
-export default connect(mapStateToProps,mapDispatchToProps)(HomeScreen)
+export default connect(mapStateToProps,mapDispatchToProps)(CampingScreen)
 
   

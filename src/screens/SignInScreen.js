@@ -1,9 +1,9 @@
 import React, { Component } from 'react'
 import {StyleSheet,Dimensions,Image,Keyboard} from 'react-native'
 import logo from '../images/logo.png'
-import curved_mask from '../images/curved_mask.png'
-import curved_mask_inverted from '../images/curved_mask_inverted.png'
-import { Container, View, Icon, Button, Text,Footer,Form, Item, Input } from 'native-base';
+import background from '../images/background.jpg'
+import { Container, View, Icon, Text,Item, Input } from 'native-base';
+import { Button as ButtonPaper } from 'react-native-paper';
 import * as Animatable from 'react-native-animatable';
 import {connect} from 'react-redux'
 import {setUserSession} from '../redux/actions/auth'
@@ -17,8 +17,9 @@ const logoSize = {
 class SignInScreen extends Component { 
 state = {
     keyboardOpen : false,
-    email : 'arivera@groupbi.cl',
-    password : '1313'
+    email : '',
+    password : '',
+    buttonLoading : false
 }
 componentWillMount () {
     this.keyboardDidShowListener = Keyboard.addListener('keyboardDidShow', this._keyboardDidShow);
@@ -37,19 +38,20 @@ _keyboardDidHide = ()=> {
 }
 onSignIn = async ()=> {
     const {email,password} = this.state;
-    this.props.setUserSession(email,password,this.props.navigation);
+    this.setState({buttonLoading : true})
+    let ok = await this.props.setUserSession(email,password);
+    this.setState({buttonLoading : false},()=>{
+        if(ok){
+            this.props.navigation.navigate("App")
+        }
+    })
 }
 render() {
     const {keyboardOpen,email,password} = this.state;
     return (
         <Container>
+            <Image source={background} style={styles.backgroundImage} />
             <View style={styles.content}>
-                <View style={styles.topContent}>
-                    <Image 
-                    resizeMode="cover" 
-                    style={styles.curvedMask}  
-                    source={curved_mask} />
-                </View>
                 <View style={styles.bodyContent}>
                     {!keyboardOpen &&
                     <View style={styles.logoContainer}>
@@ -58,17 +60,23 @@ render() {
                             source={logo} />
                     </View>
                     }
-                    <View style={styles.inputsContainer}>
+                    <View style={[styles.inputsContainer,keyboardOpen && {flex : 1,justifyContent : 'center'}]}>
                         <Animatable.View animation="slideInLeft">
-                            <Item rounded>
+                            <Item 
+                            style={[{backgroundColor : 'white',paddingLeft : 10}
+                            ,keyboardOpen && styles.inputMarginVertical]}
+                            rounded>
                                 <Input
+                                keyboardType="email-address"
                                 value={email}
                                 onChangeText={email => this.setState({email})}
                                 placeholder='Email' />
                             </Item>
                         </Animatable.View>
                         <Animatable.View animation="slideInRight">
-                            <Item rounded>
+                            <Item 
+                            style={[{backgroundColor : 'white',paddingLeft : 10},keyboardOpen && styles.inputMarginVertical]}
+                            rounded>
                                 <Input 
                                 value={password}
                                 onChangeText={password => this.setState({password})}
@@ -76,18 +84,18 @@ render() {
                                 placeholder='Password' />
                             </Item>
                         </Animatable.View>
-                        <Button onPress={this.onSignIn} iconLeft block rounded primary>
-                            <Icon name='login' type="Entypo" />
-                            <Text>INICIAR SESIÓN</Text>
-                        </Button>
+                        <ButtonPaper 
+                        loading={this.state.buttonLoading}
+                        icon="keyboard-arrow-right" 
+                        mode="outlined" 
+                        color = '#62B1F6'
+                        style={[{backgroundColor : '#f5f5f5'},
+                        keyboardOpen && styles.inputMarginVertical]}
+                        onPress={this.onSignIn}>
+                            INICIAR SESIÓN
+                        </ButtonPaper>
                     </View>
                 </View>
-            </View>
-            <View style={styles.bottomContent}>
-                <Image 
-                resizeMode="cover" 
-                style={styles.curvedMaskInverted}  
-                source={curved_mask_inverted} />
             </View>
         </Container>
     )
@@ -99,6 +107,17 @@ const styles = StyleSheet.create({
         flex : 1,
         width : '100%'
     },
+    backgroundImage: {
+        opacity : .8,
+        position : 'absolute',
+        width : null,
+        height : null,
+        top : 0,
+        bottom : 0,
+        left:0,
+        right : 0,
+        resizeMode: 'cover', // or 'stretch'
+    },
     logoContainer : {
         flex : .4,
         width : '100%',
@@ -109,20 +128,8 @@ const styles = StyleSheet.create({
         width : logoSize.width,
         height : logoSize.height
     },
-    topContent : {
-        position : 'relative',
-        width : '100%',
-        height : screenHeight * 0.1,
-        backgroundColor : 'rgb(128, 127, 0)',
-        alignItems : 'center'
-    },
-    bottomContent : {
-        position : 'relative',
-        width : '100%',
-        height : screenHeight * 0.1,
-        backgroundColor : 'rgb(128, 127, 0)',
-        justifyContent : 'flex-end',
-        alignItems : 'center'
+    inputMarginVertical : {
+        marginVertical : 10
     },
     bodyContent : {
         flex : 1,
@@ -131,23 +138,9 @@ const styles = StyleSheet.create({
         height : screenHeight * 0.8
     },
     inputsContainer : {
-        flex : .6,
+        flex : .5,
         justifyContent : 'space-around',
         width : '100%'
-    },
-    curvedMask : {
-        width : '100%',
-        position : 'absolute',
-        bottom : 0,
-        left : 0,
-        right : 0
-    },
-    curvedMaskInverted : {
-        width : '100%',
-        position : 'absolute',
-        top : 0,
-        left : 0,
-        right : 0
     }
 })
 

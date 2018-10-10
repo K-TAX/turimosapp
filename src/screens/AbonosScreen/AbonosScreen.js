@@ -5,7 +5,7 @@ import _ from 'lodash'
 import {NavigationActions} from 'react-navigation'
 import {connect} from 'react-redux'
 import AbonosListItem from './components/AbonosListItem'
-import {deleteTempAbono} from '../../redux/actions/abonos'
+import {deleteTempAbono,deleteAbono} from '../../redux/actions/abonos'
 import moment from 'moment'
 
 class AbonosScreen extends Component {

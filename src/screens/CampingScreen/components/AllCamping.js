@@ -1,5 +1,5 @@
 import React, { Component } from 'react'
-import {StyleSheet,View} from 'react-native'
+import {StyleSheet,View,ScrollView} from 'react-native'
 import {Content, Container,Grid,Row,Col,Thumbnail,Icon,Text,Toast} from 'native-base'
 import moment from 'moment'
 import {CalendarList } from 'react-native-calendars'
@@ -22,7 +22,7 @@ export class MultiCalendar extends Component {
     }
   }
   onDayLongPress = (day)=>{
-    this.props.navigation.navigate("DayDetailScreen",{day : day.dateString})
+    this.props.navigation.navigate("DayDetailScreen",{day : day.dateString,isCamping : true})
   }
   onDayPress = async (day)=>{
     const {reservasPeriods,firstSelected,secondSelected} = this.state;
@@ -53,7 +53,10 @@ export class MultiCalendar extends Component {
           resolve()
         },100)
       })
-      this.props.navigation.navigate("NewReservaScreen",{dateRange : [firstSelected,day.dateString]})
+      this.props.navigation.navigate("NewReservaScreen",{
+        dateRange : [firstSelected,day.dateString],
+        isCamping : true
+      })
     }else{
       this.setState({firstSelected : day.dateString});
       reservasPeriods[day.dateString] = {...reservasPeriods[day.dateString],selected : true}
@@ -64,26 +67,24 @@ export class MultiCalendar extends Component {
     this.setState({firstSelected : false,secondSelected : false})
   }
   render() {
-    const {cabanas,colors} = this.props;
+    const {campings : allCampings,colors} = this.props;
     const {reservasPeriods} = this.state;
     return (
     <Container>
-       <Grid style={{maxHeight : 40}}>
-        <Row>
-          {cabanas.map((cabana,i)=>(
-          <Col style={{alignItems : 'center'}} key={i}>
-            <View style={{ flex : 1 ,flexDirection : 'row',alignItems : 'center'}}>
-                <Thumbnail 
-                small
-                style={{width : 20,height : 20}}
-                source={{uri: `${SERVER.server}/${cabana.Main}`}} />
-                <Text style={{fontSize : 9,marginHorizontal : 5}}>{cabana.Id.toUpperCase()}</Text>
+       <Grid style={{maxHeight : 80}}>
+        {_.chunk(allCampings,3).map((campings,i)=>(
+          <Row style={{height : 40}} key={i}>
+            {campings.map((camping,ii)=>(
+            <Col style={{alignItems : 'center'}} key={ii}>
+              <View style={{ flex : 1 ,flexDirection : 'row',alignItems : 'center'}}>
+                <Text style={{fontSize : 9,marginHorizontal : 5}}>{camping.Nombre.toUpperCase()}</Text>
                 <Icon name="invert-colors" type="MaterialIcons" 
-                    style={{color : colors[cabana.Id],fontSize : 15}}/>
-            </View>
-          </Col>
-          ))}
-        </Row>
+                    style={{color : colors[camping.Id],fontSize : 15}}/>
+              </View>
+            </Col>
+            ))}
+          </Row>
+        ))}
       </Grid>
       <Content>
         <CalendarList

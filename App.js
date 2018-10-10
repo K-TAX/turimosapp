@@ -24,9 +24,11 @@ import {LocaleConfig} from 'react-native-calendars';
 import moment from 'moment'
 import {createMaterialBottomTabNavigator} from 'react-navigation-material-bottom-tabs'
 import AuthLoadingScreen from './src/screens/AuthLoadingScreen';
+import CampingScreen from './src/screens/CampingScreen';
 import SignInScreen from './src/screens/SignInScreen';
 import NewReservaScreen from './src/screens/NewReservaScreen';
 import HomeScreen from './src/screens/HomeScreen';
+import DayDetailScreen from './src/screens/DayDetailScreen';
 import ReservasScreen from './src/screens/ReservasScreen';
 import ReservasDetailScreen from './src/screens/ReservasDetailScreen';
 import AbonosScreen from './src/screens/AbonosScreen';
@@ -45,6 +47,7 @@ LocaleConfig.defaultLocale = 'es';
 
 const AppTabNavigator = createMaterialBottomTabNavigator({
   Principal : {screen : HomeScreen},
+  Camping : {screen : CampingScreen},
   Reservas : {screen : ReservasScreen}
 },
 {
@@ -56,7 +59,7 @@ AppTabNavigator.navigationOptions = ({ navigation }) => {
   let { routeName } = navigation.state.routes[navigation.state.index];
 
   let headerTitle = routeName;
-  if(routeName === "Principal") headerTitle = "Turismo El Encuentro";
+  if(routeName === "Principal") headerTitle = "Cabañas";
   return {
     headerTitle : (<Text style={{color : 'white'}}>{headerTitle}</Text>),
   };
@@ -89,6 +92,9 @@ const AppStackNavigator = createStackNavigator({
         </Menu>
       )
     })
+  },
+  DayDetailScreen : {
+    screen : DayDetailScreen
   },
   NewReservaScreen : {
     screen : NewReservaScreen
