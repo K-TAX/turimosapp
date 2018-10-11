@@ -29,7 +29,7 @@ export function httpGet(endpoint,parameter = null,authorizarion = null){
 }
 
 export function httpDelete(endpoint,parameter = null,authorizarion = null){
-    let param = parameter ? parameter : '';
+    let param = (parameter || parameter === 0) ? parameter : '';
     let route = endpoint+param;
     return axios.delete(route,myApiConfig(authorizarion)).then(response => {
         return response

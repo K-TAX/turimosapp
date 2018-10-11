@@ -50,8 +50,7 @@ class ReservasScreen extends Component {
     })
   }
   handleCleanReservasAnuladas = ()=>{
-    let isCamping = !!(this.state.filter === 1)
-    this.props.limpiarReservasAnuladas(isCamping);
+    this.props.limpiarReservasAnuladas(this.state.filter);
   }
   render() {
     const {reservas_admin,reservas_admin_campings} = this.props;

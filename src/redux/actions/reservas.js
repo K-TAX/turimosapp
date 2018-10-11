@@ -101,7 +101,7 @@ export const fetchReservasAdminCampings = ()=>{
 export const limpiarReservasAnuladas = (isCamping)=>{
     const state = storeConfig.store.getState();
     return (dispatch) => {
-        httpDelete(ENDPOINTS.clean_all_anuladas,isCamping ? 1:0,state.auth.accessToken).then(({data,status})=>{
+        httpDelete(ENDPOINTS.clean_all_anuladas,isCamping,state.auth.accessToken).then(({data,status})=>{
             if(status === 200){
                 dispatch({
                     type : "LIMPIAR_RESERVAS_ANULADAS",

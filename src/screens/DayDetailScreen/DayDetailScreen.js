@@ -3,7 +3,7 @@ import { StyleSheet,View,ActivityIndicator,FlatList} from 'react-native'
 import { Container,Toast,Text } from 'native-base';
 import _ from 'lodash'
 import {connect} from 'react-redux'
-import {fetchReservasAdmin,limpiarReservasAnuladas,fetchReservasAdminCampings} from '../../redux/actions/reservas'
+import {fetchReservasAdmin,fetchReservasAdminCampings} from '../../redux/actions/reservas'
 import ReservaListItem from './components/ReservaListItem'
 import moment from 'moment'
 import {enumerateDaysBetweenDates} from '../../services/dateServices'
@@ -69,9 +69,6 @@ class DayDetailScreen extends Component {
       duration : 2000
     })
   }
-  handleCleanReservasAnuladas = ()=>{
-     this.props.limpiarReservasAnuladas();
-  }
   render() {
     const {isReady,reservas} = this.state;
     return (
@@ -122,8 +119,7 @@ const mapStateToProps = state => ({
 })
 const mapDispatchToProps = dispatch => ({
   fetchReservasAdmin  :  ()=>dispatch(fetchReservasAdmin()),
-  fetchReservasAdminCampings  :  ()=>dispatch(fetchReservasAdminCampings()),
-  limpiarReservasAnuladas  :  ()=>dispatch(limpiarReservasAnuladas())
+  fetchReservasAdminCampings  :  ()=>dispatch(fetchReservasAdminCampings())
  })
 
 export default connect(mapStateToProps,mapDispatchToProps)(DayDetailScreen)

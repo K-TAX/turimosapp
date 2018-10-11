@@ -7,6 +7,7 @@ import {Provider} from 'react-redux'
 import { PersistGate } from 'redux-persist/integration/react'
 import getTheme from './native-base-theme/components';  
 import commonColor from './native-base-theme/variables/commonColor';
+import NavigationService from './src/services/navigationService';
 import { 
   createSwitchNavigator,
   createStackNavigator,
@@ -133,7 +134,10 @@ export default ()=> (
                   <StatusBar backgroundColor="#000000" />
                   <Root>
                     <Portal.Host>
-                      <AppNavigator />
+                      <AppNavigator 
+                      ref={navigatorRef => {
+                        NavigationService.setTopLevelNavigator(navigatorRef);
+                      }} />
                     </Portal.Host>
                   </Root>
                 </View>
